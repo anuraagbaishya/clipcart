@@ -10,7 +10,16 @@ import asyncio
 import logging
 
 from bson import ObjectId
-from models import ExtractRequest, Recipe, ExportResponse
+from models import (
+    ExtractRequest,
+    Recipe,
+    ExtractResponse,
+    RecipeListResponse,
+    RecipeResponse,
+    OkResponse,
+    ShoppingListRequest,
+    ShoppingListResponse,
+)
 
 from gemini_ops import GeminiOps
 import os
@@ -28,8 +37,8 @@ templates = Jinja2Templates(directory="templates")
 mongo = MongoUtils()
 
 
-@app.post("/api/recipe/extract")
-async def extract_recipe_from_url(data: ExtractRequest, response_model=ExportResponse):
+@app.post("/api/recipe/extract", response_model=ExtractResponse)
+async def extract_recipe_from_url(data: ExtractRequest) -> ExtractResponse:
     url: str = data.url
 
     try:
@@ -54,7 +63,7 @@ async def extract_recipe_from_url(data: ExtractRequest, response_model=ExportRes
         asyncio.to_thread(update_ingredients_in_recipe, recipe_id, measured_ingredients)
     )
 
-    return ExportResponse(recipe_id=str(recipe_id))  # type: ignore
+    return ExtractResponse(recipe_id=str(recipe_id))  # type: ignore
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -64,14 +73,31 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/api/recipe/{recipe_id}")
-def get_recipe_by_id(recipe_id: str):
-    return mongo.get_recipe_by_id(recipe_id)
+@app.get("/api/recipe/{recipe_id}", response_model=RecipeResponse)
+def get_recipe_by_id(recipe_id: str) -> RecipeResponse:
+    recipe = mongo.get_recipe_by_id(recipe_id)
+
+    return RecipeResponse(root=recipe)
 
 
-@app.get("/api/recipes")
-def get_all_recipes() -> List[Recipe]:
-    return mongo.get_all_recipes()
+@app.get("/api/recipes", response_model=RecipeListResponse)
+def get_all_recipes() -> RecipeListResponse:
+    return RecipeListResponse(recipes=mongo.get_all_recipes())
+
+
+@app.delete("/api/recipe/{recipe_id}", response_model=OkResponse)
+def delete_recipe(recipe_id: str) -> OkResponse:
+    mongo.delete_recipe(recipe_id)
+
+    return OkResponse()
+
+
+@app.post("/api/shoppinglist", response_model=ShoppingListResponse)
+def generate_shopping_list(req: ShoppingListRequest) -> ShoppingListResponse:
+    recipes = mongo.find_recipes_by_ids(req.ids)
+
+    items = get_unique_ingredients(recipes)
+    return ShoppingListResponse(items=items)
 
 
 def update_ingredients_in_recipe(id: ObjectId, measured_ingredients: List[str]) -> None:
@@ -86,3 +112,11 @@ def update_ingredients_in_recipe(id: ObjectId, measured_ingredients: List[str]) 
 
     mongo.update_ingredients_in_recipe(id, ingredients)
     logging.info(f"ingredient list updated for {id}")
+
+
+def get_unique_ingredients(recipes: List[Recipe]) -> List[str]:
+    unique_ingredients = set()
+    for r in recipes:
+        unique_ingredients.update(r.ingredients)
+
+    return list(unique_ingredients)

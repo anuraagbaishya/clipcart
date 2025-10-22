@@ -34,6 +34,11 @@
     width: auto;
 }
 
+.top-bar span {
+    font-size: 1.5em;
+    color: var(--accent);
+}
+
 .home-button {
     background: var(--accent);
     color: var(--fg);
@@ -117,4 +122,40 @@
 /* Clicking outside overlay closes it */
 body.overlay-open {
     overflow: hidden;
+}
+
+.menu-button {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--accent);
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.menu-button:hover {
+    transform: scale(1.2);
+}
+
+.shopping-list-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--accent);
+    color: var(--fg);
+    border: none;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: background 0.2s, transform 0.2s;
+    z-index: 1000;
+}
+
+.shopping-list-button:hover {
+    background-color: var(--accent-hover);
+    transform: scale(1.05);
 }
