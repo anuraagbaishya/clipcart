@@ -1,0 +1,23 @@
+[project]
+name = "clipcart"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Anuraag Baishya",email = "baishya.anuraag1920@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "recipe-scrapers (>=15.9.0,<16.0.0)",
+    "google-genai (>=1.45.0,<2.0.0)",
+    "pydantic (>=2.12.3,<3.0.0)",
+    "pymongo (>=4.15.3,<5.0.0)",
+    "fastapi (>=0.119.1,<0.120.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "jinja2 (>=3.1.6,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

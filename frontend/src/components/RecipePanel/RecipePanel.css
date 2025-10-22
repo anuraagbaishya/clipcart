@@ -1,0 +1,82 @@
+.recipe-panel-wrapper {
+    display: flex;
+    gap: 1rem;
+    margin-top: 80px;
+    /* space for top-bar */
+    padding: 1rem;
+    height: calc(100vh - 80px);
+}
+
+.recipe-list {
+    width: 300px;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.recipe-card {
+    background: #111;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.recipe-card.active {
+    border: 2px solid #f24405;
+}
+
+.recipe-detail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 60%;
+    max-width: 600px;
+    height: 100vh;
+    background: #010101;
+    border-left: 2px solid #f24405;
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    z-index: 1000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.recipe-detail.slide-in {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.recipe-detail-inner {
+    padding: 2rem;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    background: transparent;
+    border: none;
+    color: #f24405;
+    cursor: pointer;
+}
+
+.ingredients-list {
+    list-style: none;
+    padding: 0;
+}
+
+.ingredients-list li {
+    background: #111;
+    margin: 0.4rem 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+/* prevent page scroll when overlay is open */
+body.overlay-open {
+    overflow: hidden;
+}

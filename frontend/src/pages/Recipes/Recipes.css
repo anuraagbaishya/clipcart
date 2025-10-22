@@ -1,0 +1,120 @@
+.recipes-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #010101;
+    color: #f5f5f5;
+    font-family: "Nunito", sans-serif;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* logo left, button right */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--card-bg);
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 2rem;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.top-bar .logo {
+    height: 1.5rem;
+    width: auto;
+}
+
+.home-button {
+    background: var(--accent);
+    color: var(--fg);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.home-button:hover {
+    background: var(--accent-hover);
+}
+
+.recipe-panel-wrapper {
+    display: flex;
+    gap: 1rem;
+    margin-top: 80px;
+    /* below top-bar */
+    padding: 1rem;
+    height: calc(100vh - 80px);
+}
+
+.recipe-list {
+    width: 300px;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.recipe-card {
+    background: #111;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.recipe-card.active {
+    border: 2px solid #f24405;
+}
+
+.recipe-detail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 60%;
+    max-width: 600px;
+    height: 100vh;
+    background: #010101;
+    border-left: 2px solid #f24405;
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    z-index: 1000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.recipe-detail.slide-in {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.recipe-detail-inner {
+    padding: 2rem;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    background: transparent;
+    border: none;
+    color: #f24405;
+    cursor: pointer;
+}
+
+/* Clicking outside overlay closes it */
+body.overlay-open {
+    overflow: hidden;
+}
