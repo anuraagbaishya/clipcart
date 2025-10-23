@@ -18,6 +18,7 @@ from models import (
     RecipeResponse,
     OkResponse,
     AddRecipeRequest,
+    ShoppingListRequest,
 )
 
 from gemini_ops import GeminiOps
@@ -39,6 +40,7 @@ mongo = MongoUtils()
 @app.get("/", response_class=HTMLResponse)
 @app.get("/recipes", response_class=HTMLResponse)
 @app.get("/addRecipe", response_class=HTMLResponse)
+@app.get("/shoppingList", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
@@ -112,6 +114,27 @@ async def add_recipe(data: AddRecipeRequest) -> RecipeIdResponse:
     )
 
     return RecipeIdResponse(recipe_id=str(recipe_id))  # type: ignore
+
+
+@app.post("/api/shopping_list/create", response_model=OkResponse)
+def create_shopping_list(data: ShoppingListRequest) -> OkResponse:
+    mongo.create_shopping_list(data.items)
+
+    return OkResponse()
+
+
+@app.post("/api/shopping_list/update", response_model=OkResponse)
+def update_shopping_list(data: ShoppingListRequest) -> OkResponse:
+    mongo.update_shopping_list(data.items)
+
+    return OkResponse()
+
+
+@app.delete("/api/shopping_list/delete", response_model=OkResponse)
+def delete_shopping_list() -> OkResponse:
+    mongo.delete_shopping_list()
+
+    return OkResponse()
 
 
 def update_ingredients_in_recipe(id: ObjectId, measured_ingredients: List[str]) -> None:

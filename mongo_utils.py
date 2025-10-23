@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, List
 from bson import ObjectId
 from pymongo import MongoClient
 
-from models import Recipe
+from models import Recipe, ShoppingListItem
 
 
 class MongoUtils:
@@ -12,6 +12,7 @@ class MongoUtils:
         self.client: MongoClient = MongoClient(f"mongodb://{self.mongo_path}")
         self.db = self.client.clipcart
         self.recipes_collection = self.db.recipes
+        self.shopping_list_collection = self.db.shopping_list
 
     def add_recipe(self, recipe: Recipe) -> ObjectId:
         result = self.recipes_collection.insert_one(recipe.model_dump())
@@ -62,3 +63,18 @@ class MongoUtils:
             recipe_list.append(Recipe.model_validate(r))
 
         return recipe_list
+
+    def create_shopping_list(self, items: List[ShoppingListItem]) -> None:
+        self.shopping_list_collection.insert_one(
+            {"items": [i.model_dump() for i in items]}
+        )
+
+    def delete_shopping_list(self) -> None:
+        self.shopping_list_collection.delete_many({})
+
+    def update_shopping_list(self, items: List[ShoppingListItem]) -> None:
+        self.shopping_list_collection.update_one(
+            {}, {"$set": {"items": [i.model_dump() for i in items]}}
+        )
+
+    # def get_shopping_list(self, items:)

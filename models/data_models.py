@@ -6,6 +6,11 @@ class IngredientList(BaseModel):
     ingredients: List[str]
 
 
+class ShoppingListItem(BaseModel):
+    name: str
+    checked: bool
+
+
 class Recipe(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")  # optional
     title: str

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import clipcart from "../../assets/clipcart.png";
 import RecipePanel from "../../components/RecipePanel/RecipePanel";
-import type { Recipe, RecipeList } from "../../components/RecipePanel/types";
+import type { Recipe, RecipeList } from "../../types";
 import "./Recipes.css";
 
 export default function Recipes() {
@@ -44,9 +44,15 @@ export default function Recipes() {
                 </div>
 
                 {/* Right: Home button */}
-                <button className="home-button" onClick={() => navigate("/")}>
-                    Home
-                </button>
+                <div className="top-bar-right">
+                    <button className="top-bar-button" onClick={() => navigate("/addRecipe")}>
+                        Add Recipe
+                    </button>
+                    <button className="top-bar-button" onClick={() => navigate("/")}>
+                        Home
+                    </button>
+                </div>
+
             </div>
 
             {/* Recipe List + Detail */}

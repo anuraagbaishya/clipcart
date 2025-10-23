@@ -1,5 +1,5 @@
 import React from "react";
-import type { Recipe, RecipeList as RecipeListType } from "./types";
+import type { Recipe, RecipeList as RecipeListType } from "../../types";
 import RecipeCard from "./RecipeCard";
 
 interface Props {

@@ -1,0 +1,119 @@
+.shopping-list-page {
+    display: flex;
+    justify-content: center;
+    /* padding: 2rem; */
+}
+
+.shopping-list-container {
+    color: var(--fg, #f5f5f5);
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 500px;
+    margin-top: 80px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.add-item {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.add-item input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    outline: none;
+    height: 3rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+    background: var(--card-bg);
+    color: #fff;
+}
+
+.add-item button {
+    background: var(--accent, #F24405);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition, all 0.3s ease);
+    height: 3rem;
+    font-size: 1.1em;
+}
+
+.add-item button:hover {
+    background: var(--accent-hover);
+}
+
+.shopping-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.shopping-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* left = checkbox+text, right = delete */
+    background: var(--card-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shopping-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-grow: 1;
+    /* text fills space until delete button */
+}
+
+.shopping-item span {
+    text-align: left;
+}
+
+.shopping-item.checked span {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.shopping-item input[type="checkbox"] {
+    accent-color: var(--accent);
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-size: 1em;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, transform 0.2s;
+    border-radius: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-btn:hover {
+    background: var(--accent);
+    color: var(--fg);
+    transform: scale(1.1);
+}

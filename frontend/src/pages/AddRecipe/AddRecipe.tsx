@@ -51,10 +51,14 @@ export default function AddRecipe() {
                     <span>Clipcart</span>
                 </div>
 
-                {/* Right: Home button */}
-                <button className="home-button" onClick={() => navigate("/")}>
-                    Home
-                </button>
+                <div className="top-bar-right">
+                    <button className="top-bar-button" onClick={() => navigate("/recipes")}>
+                        View Recipes
+                    </button>
+                    <button className="top-bar-button" onClick={() => navigate("/")}>
+                        Home
+                    </button>
+                </div>
             </div>
             <div className="add-recipe-container">
                 <h2>Add New Recipe</h2>
@@ -62,7 +66,7 @@ export default function AddRecipe() {
                     {/* Title */}
                     <label>
                         Title:
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                        <input className="title-text" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
                     </label>
 
                     {/* Ingredients */}

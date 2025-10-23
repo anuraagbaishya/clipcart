@@ -39,7 +39,12 @@
     color: var(--accent);
 }
 
-.home-button {
+.top-bar-right {
+    display: flex;
+    gap: 0.5em;
+}
+
+.top-bar-button {
     background: var(--accent);
     color: var(--fg);
     border: none;

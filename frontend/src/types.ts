@@ -11,6 +11,7 @@ export interface RecipeList {
     recipes: Recipe[];
 }
 
-export interface ShoppingList {
-    items: string[];
+export interface ShoppingItem {
+    name: string;
+    checked: boolean;
 }
