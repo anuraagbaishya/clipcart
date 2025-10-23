@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import clipcart from "../../assets/clipcart.png";
 import RecipePanel from "../../components/RecipePanel/RecipePanel";
-import type { Recipe, RecipeList } from "../../components/RecipePanel/RecipePanel";
-import "./Recipes.css"; // Separate CSS for Recipes page
+import type { Recipe, RecipeList } from "../../components/RecipePanel/types";
+import "./Recipes.css";
 
 export default function Recipes() {
     const [recipes, setRecipes] = useState<RecipeList>({ recipes: [] });

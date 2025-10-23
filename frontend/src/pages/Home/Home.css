@@ -1,19 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 
 :root {
-    --bg: #101010;
+    --bg: #010101;
     --fg: #f5f5f5;
     --accent: #F24405;
     --accent-hover: #F24405;
-    --card-bg: #010101;
+    --card-bg: #111;
+    --card-hover: #222;
     --radius: 1rem;
+    --list-radius: 0.5rem;
     --transition: all 0.3s ease;
 }
 
 body {
     margin: 0;
     font-family: "Nunito", sans-serif;
-    background: var(--card-bg);
+    background: var(--bg);
     color: var(--fg);
 }
 
@@ -46,7 +48,7 @@ body {
 .home-input-section {
     display: flex;
     align-items: center;
-    background-color: var(--card-bg);
+    background-color: var(--bg);
     border: 2px solid var(--accent);
     border-radius: var(--radius);
     padding: 0.5rem;

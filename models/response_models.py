@@ -3,7 +3,7 @@ from .data_models import Recipe
 from typing import List, Optional
 
 
-class ExtractResponse(BaseModel):
+class RecipeIdResponse(BaseModel):
     recipe_id: str = Field(alias="recipeId")
 
     model_config = ConfigDict(populate_by_name=True)
@@ -19,7 +19,3 @@ class RecipeListResponse(BaseModel):
 
 class OkResponse(BaseModel):
     ok: str = "ok"
-
-
-class ShoppingListResponse(BaseModel):
-    items: List[str]

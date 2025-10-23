@@ -13,12 +13,11 @@ from bson import ObjectId
 from models import (
     ExtractRequest,
     Recipe,
-    ExtractResponse,
+    RecipeIdResponse,
     RecipeListResponse,
     RecipeResponse,
     OkResponse,
-    ShoppingListRequest,
-    ShoppingListResponse,
+    AddRecipeRequest,
 )
 
 from gemini_ops import GeminiOps
@@ -37,8 +36,15 @@ templates = Jinja2Templates(directory="templates")
 mongo = MongoUtils()
 
 
-@app.post("/api/recipe/extract", response_model=ExtractResponse)
-async def extract_recipe_from_url(data: ExtractRequest) -> ExtractResponse:
+@app.get("/", response_class=HTMLResponse)
+@app.get("/recipes", response_class=HTMLResponse)
+@app.get("/addRecipe", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.post("/api/recipe/extract", response_model=RecipeIdResponse)
+async def extract_recipe_from_url(data: ExtractRequest) -> RecipeIdResponse:
     url: str = data.url
 
     try:
@@ -49,6 +55,10 @@ async def extract_recipe_from_url(data: ExtractRequest) -> ExtractResponse:
     measured_ingredients: List[str] = scraper.ingredients()
     instructions: str = scraper.instructions()
     title: str = scraper.title()
+
+    print(title)
+    print(instructions)
+    print(measured_ingredients)
 
     recipe = Recipe(
         title=title,
@@ -63,14 +73,7 @@ async def extract_recipe_from_url(data: ExtractRequest) -> ExtractResponse:
         asyncio.to_thread(update_ingredients_in_recipe, recipe_id, measured_ingredients)
     )
 
-    return ExtractResponse(recipe_id=str(recipe_id))  # type: ignore
-
-
-@app.get("/", response_class=HTMLResponse)
-@app.get("/recipe/<id>")
-@app.get("/recipes")
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return RecipeIdResponse(recipe_id=str(recipe_id))  # type: ignore
 
 
 @app.get("/api/recipe/{recipe_id}", response_model=RecipeResponse)
@@ -92,12 +95,23 @@ def delete_recipe(recipe_id: str) -> OkResponse:
     return OkResponse()
 
 
-@app.post("/api/shoppinglist", response_model=ShoppingListResponse)
-def generate_shopping_list(req: ShoppingListRequest) -> ShoppingListResponse:
-    recipes = mongo.find_recipes_by_ids(req.ids)
+@app.post("/api/recipe/add", response_model=RecipeIdResponse)
+async def add_recipe(data: AddRecipeRequest) -> RecipeIdResponse:
 
-    items = get_unique_ingredients(recipes)
-    return ShoppingListResponse(items=items)
+    recipe = Recipe(
+        title=data.title,
+        url="",
+        measured_ingredients=data.ingredients,  # type: ignore
+        instructions=data.instructions,
+    )  # type: ignore
+
+    recipe_id: ObjectId = mongo.add_recipe(recipe)
+
+    asyncio.create_task(
+        asyncio.to_thread(update_ingredients_in_recipe, recipe_id, data.ingredients)
+    )
+
+    return RecipeIdResponse(recipe_id=str(recipe_id))  # type: ignore
 
 
 def update_ingredients_in_recipe(id: ObjectId, measured_ingredients: List[str]) -> None:

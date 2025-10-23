@@ -27,7 +27,7 @@ export default function Home() {
         }
     };
 
-    const handleAddManually = () => navigate("/recipes?manual=true");
+    const handleAddManually = () => navigate("/addRecipe");
     const handleViewRecipes = () => navigate("/recipes");
 
     return (

@@ -1,51 +1,54 @@
 import React, { useEffect, useState } from "react";
+import type { Recipe, RecipeList as RecipeListType, ShoppingList } from "./types";
+import RecipeList from "./RecipeList";
+import FilterPanel from "./FilterPanel";
+import RecipeDetail from "./RecipeDetail";
 import "./RecipePanel.css";
 
-export interface Recipe {
-    _id: string;
-    title: string;
-    url: string;
-    ingredients: string[];
-    measuredIngredients: string[];
-    instructions: string;
-}
-
-export interface RecipeList {
-    recipes: Recipe[];
-}
-
-interface ShoppingList {
-    items: string[]
-}
-
-interface RecipePanelProps {
-    recipes: RecipeList;
+interface Props {
+    recipes: RecipeListType;
     selectedRecipe: Recipe | null;
     onSelectRecipe: (recipe: Recipe | null) => void;
-    setRecipes?: React.Dispatch<React.SetStateAction<RecipeList>>;
+    setRecipes?: React.Dispatch<React.SetStateAction<RecipeListType>>;
 }
 
-const RecipePanel: React.FC<RecipePanelProps> = ({
-    recipes,
-    selectedRecipe,
-    onSelectRecipe,
-    setRecipes,
-}) => {
+const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe, setRecipes }) => {
     const [menuIds, setMenuIds] = useState<string[]>([]);
-    const [isVisible, setIsVisible] = useState(false);
+    const [favoritesOnly, setFavoritesOnly] = useState(false);
+    const [ingredientInput, setIngredientInput] = useState("");
+    const [ingredientsFilter, setIngredientsFilter] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>(recipes.recipes);
 
-    useEffect(() => {
-        setIsVisible(!!selectedRecipe);
-    }, [selectedRecipe]);
+    useEffect(() => setFilteredRecipes(recipes.recipes), [recipes.recipes]);
 
     useEffect(() => {
         const stored = localStorage.getItem("menu");
         if (stored) setMenuIds(JSON.parse(stored));
     }, []);
 
+    useEffect(() => {
+        let updated = [...recipes.recipes];
+
+        if (ingredientsFilter.length > 0) {
+            updated = updated.filter(r =>
+                ingredientsFilter.every(ing =>
+                    r.ingredients.some(i => i.toLowerCase().includes(ing.toLowerCase()))
+                )
+            );
+        }
+
+        if (searchTerm.trim() !== "") {
+            const term = searchTerm.toLowerCase();
+            updated = updated.filter(r => r.title.toLowerCase().includes(term));
+        }
+
+        setFilteredRecipes(updated);
+    }, [recipes.recipes, ingredientsFilter, searchTerm]);
+
     const toggleMenu = (id: string) => {
         const newMenu = menuIds.includes(id)
-            ? menuIds.filter((x) => x !== id)
+            ? menuIds.filter(x => x !== id)
             : [...menuIds, id];
         setMenuIds(newMenu);
         localStorage.setItem("menu", JSON.stringify(newMenu));
@@ -56,10 +59,9 @@ const RecipePanel: React.FC<RecipePanelProps> = ({
             const res = await fetch(`/api/recipe/${id}`, { method: "DELETE" });
             if (!res.ok) throw new Error("Delete failed");
 
-            if (setRecipes)
-                setRecipes((prev) => ({
-                    recipes: prev.recipes.filter((r) => r._id !== id),
-                }));
+            if (setRecipes) setRecipes(prev => ({
+                recipes: prev.recipes.filter(r => r._id !== id)
+            }));
 
             if (selectedRecipe?._id === id) onSelectRecipe(null);
         } catch (err) {
@@ -69,99 +71,48 @@ const RecipePanel: React.FC<RecipePanelProps> = ({
     };
 
     const handleShoppingList = async () => {
-        try {
-            const menu = JSON.parse(localStorage.getItem("menu") || "[]");
-            const res = await fetch(`/api/shoppinglist`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "ids": menu }),
-            });
-
-            const data: ShoppingList = await res.json()
-            console.log(data)
-        } catch (err) {
-            console.error(err);
-            alert("Failed to get shopping list");
-        }
+        const items = new Set<string>();
+        recipes.recipes.forEach(r => {
+            if (menuIds.includes(r._id)) r.ingredients.forEach(i => items.add(i));
+        });
+        const shoppingList: ShoppingList = { items: Array.from(items) };
+        console.log(shoppingList);
     };
 
     return (
         <div className="recipe-panel-wrapper">
-            {/* Recipe List */}
-            <div className="recipe-list">
-                {recipes.recipes.map((r) => (
-                    <div
-                        key={r._id}
-                        className={`recipe-card ${selectedRecipe?._id === r._id ? "active" : ""
-                            }`}
-                        onClick={() => onSelectRecipe(r)}
-                    >
-                        <span>{r.title}</span>
-                        <div className="recipe-card-buttons">
-                            <button
-                                className="menu-button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleMenu(r._id);
-                                }}
-                            >
-                                {menuIds.includes(r._id) ? "×" : "+"}
-                            </button>
-                            <button
-                                className="delete-button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(r._id);
-                                }}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    width="20"
-                                    height="20"
-                                >
-                                    <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a1 1 0 01-1 .5H8.5a1 1 0 01-1-.5L6 9zm3 2v8h2v-8H9zm4 0v8h2v-8h-2zM10 4V3a1 1 0 011-1h2a1 1 0 011 1v1h5v2H5V4h5z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <RecipeList
+                recipes={{ recipes: filteredRecipes }}
+                selectedRecipe={selectedRecipe}
+                onSelectRecipe={onSelectRecipe}
+                menuIds={menuIds}
+                toggleMenu={toggleMenu}
+                handleDelete={handleDelete}
+            />
 
-            {/* Detail Panel */}
-            <div className={`recipe-detail ${isVisible ? "slide-in" : "slide-out"}`}>
-                {selectedRecipe && (
-                    <div className="recipe-detail-inner">
-                        <button
-                            className="close-button"
-                            onClick={() => onSelectRecipe(null)}
-                        >
-                            ×
-                        </button>
-                        <h2>{selectedRecipe.title}</h2>
-                        <h3>Ingredients</h3>
-                        <ul className="ingredients-list">
-                            {selectedRecipe.measuredIngredients.map((i, idx) => (
-                                <li key={idx}>{i}</li>
-                            ))}
-                        </ul>
-                        <h3>Instructions</h3>
-                        <p>{selectedRecipe.instructions}</p>
-                    </div>
-                )}
-            </div>
+            <FilterPanel
+                favoritesOnly={favoritesOnly}
+                setFavoritesOnly={setFavoritesOnly}
+                ingredientInput={ingredientInput}
+                setIngredientInput={setIngredientInput}
+                ingredientsFilter={ingredientsFilter}
+                setIngredientsFilter={setIngredientsFilter}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+            />
 
-            {/* Shopping List */}
+            <RecipeDetail
+                recipe={selectedRecipe}
+                isVisible={!!selectedRecipe}
+                onClose={() => onSelectRecipe(null)}
+            />
+
             {menuIds.length > 0 && (
-                <button
-                    className="shopping-list-button"
-                    onClick={() => handleShoppingList()}
-                >
-                    Shopping List</button>
-            )
-            }
-        </div >
+                <button className="shopping-list-button" onClick={handleShoppingList}>
+                    Shopping List
+                </button>
+            )}
+        </div>
     );
 };
 

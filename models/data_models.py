@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -7,7 +7,7 @@ class IngredientList(BaseModel):
 
 
 class Recipe(BaseModel):
-    id: str = Field(alias="_id")
+    id: Optional[str] = Field(default=None, alias="_id")  # optional
     title: str
     url: str
     ingredients: List[str] = Field(default_factory=list)

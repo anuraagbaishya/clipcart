@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, List
 from bson import ObjectId
 from pymongo import MongoClient
 
-from models import Recipe, ShoppingListRequest
+from models import Recipe
 
 
 class MongoUtils:
