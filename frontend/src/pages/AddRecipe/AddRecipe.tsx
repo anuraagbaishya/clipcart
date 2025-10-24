@@ -38,8 +38,8 @@ export default function AddRecipe() {
 
         if (!res.ok) throw new Error("Extraction failed");
 
-        const { recipeId } = await res.json();
-        navigate(`/recipes?selected=${recipeId}`);
+        const { id } = await res.json();
+        navigate(`/recipes?selected=${id}`);
     };
 
     return (

@@ -21,6 +21,10 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
+.modal h3 {
+    margin-top: 0px;
+}
+
 .modal-section {
     margin-top: 1rem;
     display: flex;
@@ -31,7 +35,7 @@
 .modal-section input,
 .modal-section select {
     padding: 0.5rem;
-    border-radius: var(--radius);
+    border-radius: var(--list-radius);
     border: none;
     background-color: #222;
     color: var(--fg);
@@ -42,7 +46,7 @@
     background-color: var(--accent);
     color: var(--fg);
     border: none;
-    border-radius: var(--radius);
+    border-radius: var(--list-radius);
     cursor: pointer;
     transition: var(--transition);
 }
@@ -85,7 +89,7 @@
 }
 
 .shopping-list-card:hover {
-    transform: scale(1.02);
+    background: var(--card-hover);
 }
 
 .shopping-list-card.active {
@@ -129,8 +133,8 @@
     width: 60%;
     max-width: 600px;
     height: 100vh;
-    background: #010101;
-    border-left: 2px solid #f24405;
+    background: var(--bg);
+    border-left: 2px solid var(--accent);
     box-shadow: -4px 0 10px rgba(0, 0, 0, 0.7);
     overflow-y: auto;
     z-index: 1000;

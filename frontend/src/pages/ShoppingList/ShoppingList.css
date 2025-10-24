@@ -7,3 +7,16 @@
     box-sizing: border-box;
     /* leave space for fixed top-bar */
 }
+
+.shopping-lists {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.shopping-lists-container {
+    padding: 1em;
+}

@@ -19,8 +19,8 @@ export default function Home() {
 
             if (!res.ok) throw new Error("Extraction failed");
 
-            const { recipeId } = await res.json();
-            navigate(`/recipes?selected=${recipeId}`);
+            const { id } = await res.json();
+            navigate(`/recipes?selected=${id}`);
         } catch (err) {
             console.error(err);
             alert("Failed to fetch recipe.");
