@@ -19,6 +19,7 @@ from models import (
     OkResponse,
     AddRecipeRequest,
     ShoppingListRequest,
+    ShoppingListList,
 )
 
 from gemini_ops import GeminiOps
@@ -114,6 +115,11 @@ async def add_recipe(data: AddRecipeRequest) -> RecipeIdResponse:
     )
 
     return RecipeIdResponse(recipe_id=str(recipe_id))  # type: ignore
+
+
+@app.get("/api/shopping_lists", response_model=ShoppingListList)
+def get_all_shopping_lists() -> ShoppingListList:
+    return mongo.get_all_shopping_lists()
 
 
 @app.post("/api/shopping_list/create", response_model=OkResponse)

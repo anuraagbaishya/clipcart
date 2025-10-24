@@ -11,8 +11,17 @@ class ShoppingListItem(BaseModel):
     checked: bool
 
 
+class ShoppingList(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
+    items: List[ShoppingListItem]
+
+
+class ShoppingListList(BaseModel):
+    lists: List[ShoppingList]
+
+
 class Recipe(BaseModel):
-    id: Optional[str] = Field(default=None, alias="_id")  # optional
+    id: Optional[str] = Field(default=None, alias="_id")
     title: str
     url: str
     ingredients: List[str] = Field(default_factory=list)

@@ -1,0 +1,260 @@
+/* -------------------- Modal -------------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: var(--radius);
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.modal-section {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.modal-section input,
+.modal-section select {
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    border: none;
+    background-color: #222;
+    color: var(--fg);
+}
+
+.modal-section button {
+    padding: 0.5rem;
+    background-color: var(--accent);
+    color: var(--fg);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-section button:hover {
+    background-color: var(--accent-hover);
+}
+
+/* -------------------- Shopping Lists View -------------------- */
+.shopping-lists-view {
+    padding: 1rem 2rem;
+    transition: margin-right 0.3s ease;
+}
+
+.shopping-lists-view.panel-open {
+    margin-right: 400px;
+    /* slide-in panel width */
+}
+
+.shopping-lists {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+}
+
+.shopping-list-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg);
+    color: var(--fg);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: var(--transition);
+}
+
+.shopping-list-card:hover {
+    transform: scale(1.02);
+}
+
+.shopping-list-card.active {
+    border: 2px solid var(--accent);
+}
+
+.shopping-list-card-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.list-name {
+    font-weight: 600;
+}
+
+.list-progress {
+    font-size: 0.9rem;
+    color: var(--fg);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.delete-btn:hover {
+    color: red;
+}
+
+/* -------------------- Slide-in Panel -------------------- */
+.shoppinglist-detail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 60%;
+    max-width: 600px;
+    height: 100vh;
+    background: #010101;
+    border-left: 2px solid #f24405;
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    z-index: 1000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.shoppinglist-detail.slide-in {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.shoppinglist-detail.slide-out {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.shoppinglist-detail-inner {
+    padding: 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Close button inside panel */
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    background: transparent;
+    border: none;
+    color: #f24405;
+    cursor: pointer;
+}
+
+/* Checklist inside panel */
+.checklist {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checklist li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--card-bg);
+    margin: 0.4rem 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.checklist li.checked span {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.checklist input[type="text"] {
+    flex-grow: 1;
+    padding: 0.25rem;
+    border-radius: var(--radius);
+    border: none;
+    background-color: #222;
+    color: var(--fg);
+}
+
+/* -------------------- Panel Button Row -------------------- */
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.button-row button {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    background-color: #f24405;
+    color: var(--fg);
+    transition: all 0.3s ease;
+}
+
+.button-row button:hover {
+    background-color: #d63704;
+}
+
+/* -------------------- Optional Confirm Modal -------------------- */
+.confirm-modal {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 1rem;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.confirm-actions button {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    background-color: var(--accent);
+    color: var(--fg);
+    transition: all 0.3s ease;
+}
+
+.confirm-actions button:hover {
+    background-color: #d63704;
+}

@@ -11,7 +11,18 @@ export interface RecipeList {
     recipes: Recipe[];
 }
 
-export interface ShoppingItem {
+export interface ShoppingListItem {
     name: string;
     checked: boolean;
+}
+
+
+export interface ShoppingList {
+    id: string;
+    name: string;
+    items: ShoppingListItem[];
+}
+
+export interface ShoppingListList {
+    lists: ShoppingList[]
 }

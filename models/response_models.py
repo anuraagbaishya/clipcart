@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict, RootModel
-from .data_models import Recipe
+from .data_models import Recipe, ShoppingListItem
 from typing import List, Optional
 
 

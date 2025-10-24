@@ -4,7 +4,7 @@ import FilterPanel from "./FilterPanel";
 import RecipeDetail from "./RecipeDetail";
 import "./RecipePanel.css";
 import { useNavigate } from "react-router-dom";
-import type { Recipe, RecipeList as RecipeListType, ShoppingItem } from "../../types";
+import type { Recipe, RecipeList as RecipeListType, ShoppingList } from "../../types";
 
 interface Props {
     recipes: RecipeListType;
@@ -73,16 +73,6 @@ const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe,
     };
 
     const handleShoppingList = async () => {
-        try {
-            // delete any old shopping lists
-            await fetch("/api/shopping_list/delete", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-        } catch (err) {
-            console.error("Failed to delete old shopping lists:", err);
-        }
-
         const itemsSet = new Set<string>();
         recipes.recipes.forEach(r => {
             if (menuIds.includes(r._id)) {
@@ -90,21 +80,25 @@ const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe,
             }
         });
 
-        const shoppingItems: ShoppingItem[] = Array.from(itemsSet).map(i => ({
-            name: i,
-            checked: false
-        }));
+        const shoppingItems: ShoppingList = {
+            id: "",
+            name: "",
+            items: Array.from(itemsSet).map(i => ({
+                name: i,
+                checked: false
+            }))
+        };
 
-        try {
-            await fetch("/api/shopping_list/create", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items: shoppingItems }),
-            });
-            console.log("Shopping list saved!");
-        } catch (err) {
-            console.error("Failed to save shopping list:", err);
-        }
+        // try {
+        //     await fetch("/api/shopping_list/create", {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify({ items: shoppingItems }),
+        //     });
+        //     console.log("Shopping list saved!");
+        // } catch (err) {
+        //     console.error("Failed to save shopping list:", err);
+        // }
 
         navigate("/shoppingList", { state: { items: shoppingItems } });
     };

@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, List
 from bson import ObjectId
 from pymongo import MongoClient
 
-from models import Recipe, ShoppingListItem
+from models import Recipe, ShoppingListItem, ShoppingList, ShoppingListList
 
 
 class MongoUtils:
@@ -69,12 +69,27 @@ class MongoUtils:
             {"items": [i.model_dump() for i in items]}
         )
 
-    def delete_shopping_list(self) -> None:
-        self.shopping_list_collection.delete_many({})
+    def delete_shopping_list(self, id: str) -> None:
+        self.shopping_list_collection.delete_one({"_id": ObjectId(id)})
 
-    def update_shopping_list(self, items: List[ShoppingListItem]) -> None:
+    def update_shopping_list(self, id: str, items: List[ShoppingListItem]) -> None:
         self.shopping_list_collection.update_one(
-            {}, {"$set": {"items": [i.model_dump() for i in items]}}
+            {"_id": ObjectId(id)}, {"$set": {"items": [i.model_dump() for i in items]}}
         )
 
-    # def get_shopping_list(self, items:)
+    def get_all_shopping_lists(self) -> ShoppingListList:
+        shopping_lists_from_db: List[dict] = list(
+            self.shopping_list_collection.find({})
+        )
+
+        shopping_lists: List[ShoppingList] = []
+
+        for s in shopping_lists_from_db:
+            items_data: List[dict] = s.get("items", [])
+            items: List[ShoppingListItem] = [
+                ShoppingListItem.model_validate(i) for i in items_data
+            ]
+            shopping_list = ShoppingList(items=items)
+            shopping_lists.append(shopping_list)
+
+        return ShoppingListList(lists=shopping_lists)

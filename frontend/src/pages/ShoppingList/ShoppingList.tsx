@@ -1,84 +1,82 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import clipcart from "../../assets/clipcart.png";
-import "./ShoppingList.css";
-import { useShoppingListSync } from "./useShoppingListSync";
-import type { ShoppingItem } from "../../types";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { TopBar } from "../../components/TopBar/TopBar";
+import { GenerateListModal } from "../../components/ShoppingListPanel/GenerateListModal";
+import { ShoppingListPanel } from "../../components/ShoppingListPanel/ShoppingListPanel";
+import type { ShoppingList, ShoppingListItem } from "../../types";
 
-export default function ShoppingList() {
-    const navigate = useNavigate();
+export default function ShoppingListPage() {
     const location = useLocation();
-    const state = location.state as { items?: ShoppingItem[] } | undefined;
-    const initialItems = state?.items || [];
+    const itemsFromState: ShoppingListItem[] = (location.state?.items?.items ?? []).map(
+        (i: ShoppingListItem) => ({
+            name: i.name,
+            checked: i.checked ?? false,
+        })
+    );
 
-    const { items, updateItems } = useShoppingListSync(initialItems);
-    const [newItem, setNewItem] = useState("");
+    const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+    const [selectedList, setSelectedList] = useState<ShoppingList | null>(null);
+    const [showModal, setShowModal] = useState(itemsFromState.length > 0);
+    const [newListName, setNewListName] = useState("");
+    // const [modalItems, setModalItems] = useState<ShoppingListItem[]>(itemsFromState);
+    const [selectedExisting, setSelectedExisting] = useState("");
 
-    const toggleItem = (name: string) => {
-        const updated = items.map((item) =>
-            item.name === name ? { ...item, checked: !item.checked } : item
-        );
-        // move checked items to bottom
-        updated.sort((a, b) => Number(a.checked) - Number(b.checked));
-        updateItems(updated);
+    useEffect(() => {
+        const fetchLists = async () => {
+            try {
+                const res = await fetch("/api/shopping_lists");
+                const data = await res.json();
+                setShoppingLists(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error("Failed to fetch shopping lists:", err);
+            }
+        };
+        fetchLists();
+    }, []);
+
+    const handleCreateList = () => {
+        if (!newListName.trim()) return;
+
+        const newList: ShoppingList = {
+            id: `list-${Date.now()}`,
+            name: newListName,
+            items: selectedList?.items ?? [], // use selectedList.items
+        };
+
+        setShoppingLists(prev => [...prev, newList]);
+        setSelectedList(newList);
+        setShowModal(false);
     };
 
-    const addItem = () => {
-        const trimmed = newItem.trim();
-        if (trimmed && !items.some((i) => i.name === trimmed)) {
-            updateItems([{ name: trimmed, checked: false }, ...items]);
-            setNewItem("");
-        }
-    };
-
-    const deleteItem = (name: string) => {
-        updateItems(items.filter((i) => i.name !== name));
+    const handleSelectExisting = () => {
+        const existing = shoppingLists.find(l => l.id === selectedExisting);
+        if (existing) setSelectedList(existing); // Opens side panel
+        setShowModal(false);
     };
 
     return (
         <div className="shopping-list-page">
-            <div className="top-bar">
-                <div className="top-bar-left">
-                    <img src={clipcart} alt="Clipcart Logo" className="logo" />
-                    <span>Clipcart</span>
-                </div>
-                <div className="top-bar-right">
-                    <button className="top-bar-button" onClick={() => navigate("/recipes")}>View Recipes</button>
-                    <button className="top-bar-button" onClick={() => navigate("/addRecipe")}>Add Recipe</button>
-                    <button className="top-bar-button" onClick={() => navigate("/")}>Home</button>
-                </div>
-            </div>
+            <TopBar />
 
-            <div className="shopping-list-container">
-                <h2>Shopping List</h2>
+            <GenerateListModal
+                show={showModal}
+                shoppingLists={shoppingLists}
+                newListName={newListName}
+                setNewListName={setNewListName}
+                selectedExisting={selectedExisting}
+                setSelectedExisting={setSelectedExisting}
+                handleCreateList={handleCreateList}
+                handleSelectExisting={handleSelectExisting}
+            />
 
-                <div className="add-item">
-                    <input
-                        type="text"
-                        placeholder="Add new item..."
-                        value={newItem}
-                        onChange={(e) => setNewItem(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && addItem()}
-                    />
-                    <button onClick={addItem}>+</button>
-                </div>
-
-                {items.length === 0 ? (
-                    <p>No items selected.</p>
-                ) : (
-                    <ul className="shopping-list">
-                        {items.map((item) => (
-                            <li key={item.name} className={`shopping-item ${item.checked ? "checked" : ""}`}>
-                                <div className="shopping-item-left" onClick={() => toggleItem(item.name)}>
-                                    <input type="checkbox" checked={item.checked} readOnly />
-                                    <span>{item.name}</span>
-                                </div>
-                                <button className="delete-btn" onClick={(e) => { e.stopPropagation(); deleteItem(item.name); }}>✕</button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
+            {selectedList && (
+                <ShoppingListPanel
+                    shoppingLists={shoppingLists}
+                    selectedList={selectedList}
+                    setSelectedList={setSelectedList}
+                    setShoppingLists={setShoppingLists}
+                />
+            )}
         </div>
     );
 }
