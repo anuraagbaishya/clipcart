@@ -11,18 +11,16 @@ interface Props {
 }
 
 export const ShoppingListPanel: React.FC<Props> = ({
-    // shoppingLists,
     selectedList,
     setSelectedList,
     setShoppingLists,
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [newItem, setNewItem] = useState("");
-
-    if (!selectedList) return null;
+    const [showDetail, setShowDetail] = useState(false);
 
     const updateItems = (updatedItems: ShoppingListItem[]) => {
-        console.log("DEBUG: Updating items:", updatedItems);
+        if (!selectedList) return;
         const updatedList = { ...selectedList, items: updatedItems };
         setSelectedList(updatedList);
         setShoppingLists(prev =>
@@ -31,27 +29,39 @@ export const ShoppingListPanel: React.FC<Props> = ({
     };
 
     const addItem = () => {
-        if (!newItem.trim()) return;
+        if (!newItem.trim() || !selectedList) return;
         updateItems([...selectedList.items, { name: newItem.trim(), checked: false }]);
         setNewItem("");
     };
 
     const deleteItem = (idx: number) => {
+        if (!selectedList) return;
         const updated = selectedList.items.filter((_, i) => i !== idx);
         updateItems(updated);
     };
 
     const toggleItem = (idx: number) => {
+        if (!selectedList) return;
         const updated = [...selectedList.items];
         updated[idx].checked = !updated[idx].checked;
         updateItems(updated);
     };
 
+    const handleClose = () => {
+        setShowDetail(false);
+        setTimeout(() => setSelectedList(null), 300); // wait for slide-out
+    };
+
+    // Whenever a new list is selected, show the panel
+    React.useEffect(() => {
+        if (selectedList) setShowDetail(true);
+    }, [selectedList]);
+
     return (
         <ShoppingListDetail
             list={selectedList}
-            isVisible={!!selectedList}
-            onClose={() => setSelectedList(null)}
+            isVisible={showDetail}
+            onClose={handleClose}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             newItem={newItem}

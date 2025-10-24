@@ -11,6 +11,7 @@ interface Props {
     setSelectedExisting: (id: string) => void;
     handleCreateList: () => void;
     handleSelectExisting: () => void;
+    onClose: () => void;
 }
 
 export const GenerateListModal: React.FC<Props> = ({
@@ -22,12 +23,16 @@ export const GenerateListModal: React.FC<Props> = ({
     setSelectedExisting,
     handleCreateList,
     handleSelectExisting,
+    onClose,
 }) => {
     if (!show) return null;
 
     return (
         <div className="modal-overlay">
             <div className="modal">
+                <button className="modal-close" onClick={onClose}>
+                    ×
+                </button>
                 <h3>Generate Shopping List</h3>
 
                 <div className="modal-section">

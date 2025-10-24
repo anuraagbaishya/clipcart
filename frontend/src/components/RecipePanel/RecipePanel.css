@@ -109,7 +109,7 @@
     font-size: 1.5rem;
     background: transparent;
     border: none;
-    color: #f24405;
+    color: var(--accent);
     cursor: pointer;
 }
 

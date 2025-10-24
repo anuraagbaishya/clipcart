@@ -29,54 +29,58 @@ export const ShoppingListDetail: React.FC<Props> = ({
     toggleItem,
     deleteItem,
 }) => {
-    if (!list) return null;
+    // if (!list) return null;
+
+    console.log("ShoppingListDetail visible?", isVisible);
 
     return (
         <div className={`shoppinglist-detail ${isVisible ? "slide-in" : "slide-out"}`}>
-            <div className="shoppinglist-detail-inner">
-                <button className="close-button" onClick={onClose}>
-                    ×
-                </button>
-                <h2>{list.name}</h2>
-
-                <ul className="checklist">
-                    {list.items.map((item, idx) => (
-                        <li key={idx} className={item.checked ? "checked" : ""}>
-                            {isEditing ? (
-                                <>
-                                    <span>{item.name}</span>
-                                    <button onClick={() => deleteItem(idx)}>✕</button>
-                                </>
-                            ) : (
-                                <div onClick={() => toggleItem(idx)}>
-                                    <input type="checkbox" checked={item.checked} readOnly />
-                                    <span>{item.name}</span>
-                                </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-
-                {isEditing && (
-                    <div className="add-item-row">
-                        <input
-                            type="text"
-                            placeholder="New item..."
-                            value={newItem}
-                            onChange={(e) => setNewItem(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && addItem()}
-                        />
-                        <button onClick={addItem}>+</button>
-                    </div>
-                )}
-
-                <div className="button-row">
-                    <button onClick={() => setIsEditing((prev) => !prev)}>
-                        {isEditing ? "Save" : "Edit"}
+            {list && (
+                <div className="shoppinglist-detail-inner">
+                    <button className="close-button" onClick={onClose}>
+                        ×
                     </button>
-                    <button>Done</button>
+                    <h2>{list.name}</h2>
+
+                    <ul className="checklist">
+                        {list.items.map((item, idx) => (
+                            <li key={idx} className={item.checked ? "checked" : ""}>
+                                {isEditing ? (
+                                    <>
+                                        <span>{item.name}</span>
+                                        <button onClick={() => deleteItem(idx)}>✕</button>
+                                    </>
+                                ) : (
+                                    <div onClick={() => toggleItem(idx)}>
+                                        <input type="checkbox" checked={item.checked} readOnly />
+                                        <span>{item.name}</span>
+                                    </div>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+
+                    {isEditing && (
+                        <div className="add-item-row">
+                            <input
+                                type="text"
+                                placeholder="New item..."
+                                value={newItem}
+                                onChange={(e) => setNewItem(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && addItem()}
+                            />
+                            <button onClick={addItem}>+</button>
+                        </div>
+                    )}
+
+                    <div className="button-row">
+                        <button onClick={() => setIsEditing((prev) => !prev)}>
+                            {isEditing ? "Save" : "Edit"}
+                        </button>
+                        <button onClick={onClose}>Done</button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

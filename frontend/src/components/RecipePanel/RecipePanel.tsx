@@ -89,18 +89,7 @@ const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe,
             }))
         };
 
-        // try {
-        //     await fetch("/api/shopping_list/create", {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify({ items: shoppingItems }),
-        //     });
-        //     console.log("Shopping list saved!");
-        // } catch (err) {
-        //     console.error("Failed to save shopping list:", err);
-        // }
-
-        navigate("/shoppingList", { state: { items: shoppingItems } });
+        navigate("/shoppingList", { state: { openModal: true, items: shoppingItems } });
     };
 
     return (

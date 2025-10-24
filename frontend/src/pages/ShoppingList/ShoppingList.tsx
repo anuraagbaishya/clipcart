@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { TopBar } from "../../components/TopBar/TopBar";
 import { GenerateListModal } from "../../components/ShoppingListPanel/GenerateListModal";
 import { ShoppingListPanel } from "../../components/ShoppingListPanel/ShoppingListPanel";
@@ -9,6 +9,7 @@ import "./ShoppingList.css"
 
 export default function ShoppingListPage() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const itemsFromState: ShoppingListItem[] = (location.state?.items?.items ?? []).map(
         (i: ShoppingListItem) => ({
@@ -19,10 +20,10 @@ export default function ShoppingListPage() {
 
     const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
     const [selectedList, setSelectedList] = useState<ShoppingList | null>(null);
-
-    const [showModal, setShowModal] = useState(true);
+    const [showModal, setShowModal] = useState(location.state?.openModal || false);
     const [newListName, setNewListName] = useState("");
     const [selectedExisting, setSelectedExisting] = useState("");
+    const [modalItems] = useState<ShoppingListItem[]>(itemsFromState);
 
     useEffect(() => {
         const fetchLists = async () => {
@@ -38,33 +39,31 @@ export default function ShoppingListPage() {
         fetchLists();
     }, []);
 
+    useEffect(() => {
+        if (location.state?.openModal) {
+            // Remove state so it doesn't reopen on reload / back navigation
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location.state, navigate]);
+
+
     const handleCreateList = async () => {
         if (!newListName.trim()) return;
 
         const newList: ShoppingList = {
             name: newListName,
-            items: itemsFromState.map(i => ({
-                name: typeof i === "string" ? i : i.name,
-                checked: false
-            }))
+            items: modalItems.map(i => ({ ...i, checked: false }))
         };
 
-        try {
-            const res = await fetch("/api/shopping_list/create", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newList)
-            });
-
-            if (!res.ok) {
-                console.log("Shopping list creation failed")
-            }
-        } catch (err) {
-            console.error("Failed to fetch shopping lists:", err);
-        }
+        // save to backend
+        await fetch("/api/shopping_list/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newList)
+        });
 
         setShoppingLists(prev => [...prev, newList]);
-        setSelectedList(newList);
+        setSelectedList(newList); // now panel slides in
         setShowModal(false);
     };
 
@@ -87,6 +86,7 @@ export default function ShoppingListPage() {
                 setSelectedExisting={setSelectedExisting}
                 handleCreateList={handleCreateList}
                 handleSelectExisting={handleSelectExisting}
+                onClose={() => setShowModal(false)}
             />
 
             <div className="shopping-lists-container">
