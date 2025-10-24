@@ -13,7 +13,7 @@ from bson import ObjectId
 from models import (
     ExtractRequest,
     Recipe,
-    RecipeIdResponse,
+    IdResponse,
     RecipeListResponse,
     RecipeResponse,
     OkResponse,
@@ -46,8 +46,8 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/api/recipe/extract", response_model=RecipeIdResponse)
-async def extract_recipe_from_url(data: ExtractRequest) -> RecipeIdResponse:
+@app.post("/api/recipe/extract", response_model=IdResponse)
+async def extract_recipe_from_url(data: ExtractRequest) -> IdResponse:
     url: str = data.url
 
     try:
@@ -58,10 +58,6 @@ async def extract_recipe_from_url(data: ExtractRequest) -> RecipeIdResponse:
     measured_ingredients: List[str] = scraper.ingredients()
     instructions: str = scraper.instructions()
     title: str = scraper.title()
-
-    print(title)
-    print(instructions)
-    print(measured_ingredients)
 
     recipe = Recipe(
         title=title,
@@ -76,7 +72,7 @@ async def extract_recipe_from_url(data: ExtractRequest) -> RecipeIdResponse:
         asyncio.to_thread(update_ingredients_in_recipe, recipe_id, measured_ingredients)
     )
 
-    return RecipeIdResponse(recipe_id=str(recipe_id))  # type: ignore
+    return IdResponse(id=str(recipe_id))  # type: ignore
 
 
 @app.get("/api/recipe/{recipe_id}", response_model=RecipeResponse)
@@ -98,8 +94,8 @@ def delete_recipe(recipe_id: str) -> OkResponse:
     return OkResponse()
 
 
-@app.post("/api/recipe/add", response_model=RecipeIdResponse)
-async def add_recipe(data: AddRecipeRequest) -> RecipeIdResponse:
+@app.post("/api/recipe/add", response_model=IdResponse)
+async def add_recipe(data: AddRecipeRequest) -> IdResponse:
 
     recipe = Recipe(
         title=data.title,
@@ -114,7 +110,7 @@ async def add_recipe(data: AddRecipeRequest) -> RecipeIdResponse:
         asyncio.to_thread(update_ingredients_in_recipe, recipe_id, data.ingredients)
     )
 
-    return RecipeIdResponse(recipe_id=str(recipe_id))  # type: ignore
+    return IdResponse(id=str(recipe_id))  # type: ignore
 
 
 @app.get("/api/shopping_lists", response_model=ShoppingListList)
@@ -122,11 +118,11 @@ def get_all_shopping_lists() -> ShoppingListList:
     return mongo.get_all_shopping_lists()
 
 
-@app.post("/api/shopping_list/create", response_model=OkResponse)
-def create_shopping_list(data: ShoppingListRequest) -> OkResponse:
-    mongo.create_shopping_list(data.items)
+@app.post("/api/shopping_list/create", response_model=IdResponse)
+def create_shopping_list(data: ShoppingListRequest) -> IdResponse:
+    shopping_list_id = mongo.create_shopping_list(data)
 
-    return OkResponse()
+    return IdResponse(id=str(shopping_list_id))
 
 
 @app.post("/api/shopping_list/update", response_model=OkResponse)
@@ -137,8 +133,8 @@ def update_shopping_list(data: ShoppingListRequest) -> OkResponse:
 
 
 @app.delete("/api/shopping_list/delete", response_model=OkResponse)
-def delete_shopping_list() -> OkResponse:
-    mongo.delete_shopping_list()
+def delete_shopping_list(id: str) -> OkResponse:
+    mongo.delete_shopping_list(id)
 
     return OkResponse()
 

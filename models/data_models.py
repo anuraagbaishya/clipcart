@@ -13,6 +13,7 @@ class ShoppingListItem(BaseModel):
 
 class ShoppingList(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
+    name: str
     items: List[ShoppingListItem]
 
 

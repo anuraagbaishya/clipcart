@@ -30,8 +30,14 @@ export default function ShoppingListPage() {
             try {
                 const res = await fetch("/api/shopping_lists");
                 const data = await res.json();
-                console.log(data)
-                setShoppingLists(Array.isArray(data.lists) ? data.lists : []);
+
+                const lists: ShoppingList[] = data.lists.map((l: any) => ({
+                    ...l,
+                    id: l._id  // normalize
+                }));
+
+
+                setShoppingLists(lists);
             } catch (err) {
                 console.error("Failed to fetch shopping lists:", err);
             }
@@ -55,16 +61,29 @@ export default function ShoppingListPage() {
             items: modalItems.map(i => ({ ...i, checked: false }))
         };
 
-        // save to backend
-        await fetch("/api/shopping_list/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newList)
-        });
+        try {
+            const res = await fetch("/api/shopping_list/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newList)
+            });
 
-        setShoppingLists(prev => [...prev, newList]);
-        setSelectedList(newList); // now panel slides in
-        setShowModal(false);
+            if (!res.ok) {
+                console.log("Shopping list creation failed: ")
+            }
+
+            const data = await res.json()
+
+            const savedList = {
+                ...newList, id: data["_id"]
+            }
+
+            setShoppingLists(prev => [...prev, savedList]);
+            setSelectedList(newList); // now panel slides in
+            setShowModal(false);
+        } catch (err) {
+            console.log("Shopping list creation failed: ", err)
+        }
     };
 
     const handleSelectExisting = () => {
@@ -73,6 +92,23 @@ export default function ShoppingListPage() {
         setShowModal(false);
     };
 
+
+    const handleDeleteList = async (id?: string) => {
+        if (!id) return;
+
+        try {
+            const res = await fetch(`/api/shopping_list/delete?id=${id}`, {
+                method: "DELETE"
+            })
+
+            if (!res.ok) console.log("Delete failed");
+        } catch (err) {
+            console.log("Delete failed", err);
+        }
+
+        setShoppingLists(prev => prev.filter(l => l.id !== id));
+        if (selectedList?.id === id) setSelectedList(null);
+    }
     return (
         <div className="shopping-list-page">
             <TopBar />
@@ -103,11 +139,7 @@ export default function ShoppingListPage() {
                                     list={list}
                                     isActive={selectedList?.id === list.id}
                                     onClick={() => setSelectedList(list)}
-                                    onDelete={() =>
-                                        setShoppingLists(prev =>
-                                            prev.filter(l => l.id !== list.id)
-                                        )
-                                    }
+                                    onDelete={() => handleDeleteList(list.id)}
                                 />
                             )
                         })}

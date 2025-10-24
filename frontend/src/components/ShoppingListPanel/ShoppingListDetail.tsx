@@ -44,7 +44,10 @@ export const ShoppingListDetail: React.FC<Props> = ({
 
                     <ul className="checklist">
                         {list.items.map((item, idx) => (
-                            <li key={idx} className={item.checked ? "checked" : ""}>
+                            <li
+                                key={idx}
+                                className={`${item.checked ? "checked" : ""} ${isEditing ? "editing" : ""}`}
+                            >
                                 {isEditing ? (
                                     <>
                                         <span>{item.name}</span>

@@ -14,4 +14,5 @@ class AddRecipeRequest(BaseModel):
 
 
 class ShoppingListRequest(BaseModel):
+    name: str
     items: List[ShoppingListItem]
