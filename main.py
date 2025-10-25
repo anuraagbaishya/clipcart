@@ -11,7 +11,7 @@ import logging
 
 from bson import ObjectId
 from models import (
-    ExtractRequest,
+    RecipeRequest,
     Recipe,
     IdResponse,
     RecipeListResponse,
@@ -20,14 +20,19 @@ from models import (
     AddRecipeRequest,
     ShoppingListRequest,
     ShoppingListList,
+    RecipeDetails,
+    UpdateShoppingListRequest,
 )
 
-from gemini_ops import GeminiOps
+from AiTasks import ExtractRecipeDetailsTask, GenerateRecipeTask
 import os
 
 from mongo_utils import MongoUtils
 
 logging.basicConfig(level=logging.INFO)
+
+GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -47,8 +52,8 @@ async def index(request: Request):
 
 
 @app.post("/api/recipe/extract", response_model=IdResponse)
-async def extract_recipe_from_url(data: ExtractRequest) -> IdResponse:
-    url: str = data.url
+async def extract_recipe_from_url(data: RecipeRequest) -> IdResponse:
+    url: str = data.request
 
     try:
         scraper = scrape_me(url)
@@ -66,13 +71,39 @@ async def extract_recipe_from_url(data: ExtractRequest) -> IdResponse:
         instructions=instructions,
     )  # type: ignore
 
+    logging.info(f"extracted recipe: {recipe.title}")
+
     recipe_id: ObjectId = mongo.add_recipe(recipe)
 
     asyncio.create_task(
-        asyncio.to_thread(update_ingredients_in_recipe, recipe_id, measured_ingredients)
+        asyncio.to_thread(
+            update_ingredients_in_recipe, recipe_id, title, measured_ingredients
+        )
     )
 
     return IdResponse(id=str(recipe_id))  # type: ignore
+
+
+@app.post("/api/recipe/generate", response_model=IdResponse)
+async def generate_recipe(data: RecipeRequest) -> IdResponse:
+    generate_recipe_task = GenerateRecipeTask(GEMINI_KEY, GEMINI_MODEL)
+    try:
+        generated_recipe: Optional[Recipe] = generate_recipe_task.ai_request(
+            data.request
+        )
+        if not generated_recipe:
+            logging.error("No recipe generated")
+            raise HTTPException(status_code=400, detail=f"Failed to generate recipe")
+
+        logging.info(f"extracted recipe: {generated_recipe.title}")
+
+        recipe_id: ObjectId = mongo.add_recipe(generated_recipe)
+
+        return IdResponse(id=str(recipe_id))
+
+    except RuntimeError as e:
+        logging.error(e)
+        raise HTTPException(status_code=400, detail=f"{e}")
 
 
 @app.get("/api/recipe/{recipe_id}", response_model=RecipeResponse)
@@ -107,7 +138,9 @@ async def add_recipe(data: AddRecipeRequest) -> IdResponse:
     recipe_id: ObjectId = mongo.add_recipe(recipe)
 
     asyncio.create_task(
-        asyncio.to_thread(update_ingredients_in_recipe, recipe_id, data.ingredients)
+        asyncio.to_thread(
+            update_ingredients_in_recipe, recipe_id, data.title, data.ingredients
+        )
     )
 
     return IdResponse(id=str(recipe_id))  # type: ignore
@@ -126,8 +159,8 @@ def create_shopping_list(data: ShoppingListRequest) -> IdResponse:
 
 
 @app.post("/api/shopping_list/update", response_model=OkResponse)
-def update_shopping_list(data: ShoppingListRequest) -> OkResponse:
-    mongo.update_shopping_list(data.items)
+def update_shopping_list(data: UpdateShoppingListRequest) -> OkResponse:
+    mongo.update_shopping_list(data.id, data.items)
 
     return OkResponse()
 
@@ -139,18 +172,25 @@ def delete_shopping_list(id: str) -> OkResponse:
     return OkResponse()
 
 
-def update_ingredients_in_recipe(id: ObjectId, measured_ingredients: List[str]) -> None:
-    gemini_key = os.getenv("GEMINI_API_KEY", "")
-    gemini_ops = GeminiOps(gemini_key, "gemini-2.5-flash-lite")
+def update_ingredients_in_recipe(
+    id: ObjectId, dish_name: str, measured_ingredients: List[str]
+) -> None:
+    extract_recipe_details_task = ExtractRecipeDetailsTask(GEMINI_KEY, GEMINI_MODEL)
+    try:
+        recipe_details: Optional[RecipeDetails] = (
+            extract_recipe_details_task.ai_request(dish_name, measured_ingredients)
+        )
 
-    ingredients: Optional[List[str]] = gemini_ops.extract(measured_ingredients)
+        if not recipe_details:
+            logging.error("ingredient extraction failed")
+            return None
 
-    if not ingredients:
-        logging.error("ingredient extraction failed")
-        return None
-
-    mongo.update_ingredients_in_recipe(id, ingredients)
-    logging.info(f"ingredient list updated for {id}")
+        mongo.update_recipe_details(
+            id, recipe_details.ingredients, recipe_details.cuisine
+        )
+        logging.info(f"recipe details updated for {dish_name}")
+    except RuntimeError as e:
+        logging.error(e)
 
 
 def get_unique_ingredients(recipes: List[Recipe]) -> List[str]:

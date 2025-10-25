@@ -2,7 +2,8 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
-class IngredientList(BaseModel):
+class RecipeDetails(BaseModel):
+    cuisine: str
     ingredients: List[str]
 
 
@@ -24,11 +25,12 @@ class ShoppingListList(BaseModel):
 class Recipe(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     title: str
-    url: str
+    url: Optional[str] = Field(default="")
     ingredients: List[str] = Field(default_factory=list)
     measured_ingredients: List[str] = Field(
         default_factory=list, alias="measuredIngredients"
     )
+    cuisine: Optional[str] = Field(default="")
     instructions: str
 
     model_config = ConfigDict({"populate_by_name": True})

@@ -49,11 +49,11 @@ class MongoUtils:
     def delete_recipe(self, id: str) -> None:
         self.recipes_collection.delete_one({"_id": ObjectId(id)})
 
-    def update_ingredients_in_recipe(
-        self, id: ObjectId, ingredients: List[str]
+    def update_recipe_details(
+        self, id: ObjectId, ingredients: List[str], cusine: str
     ) -> None:
         self.recipes_collection.update_one(
-            {"_id": id}, {"$set": {"ingredients": ingredients}}
+            {"_id": id}, {"$set": {"ingredients": ingredients, "cuisine": cusine}}
         )
 
     def find_recipes_by_ids(self, ids: List[str]) -> List[Recipe]:

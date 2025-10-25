@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import type { ShoppingList, ShoppingListItem } from "../../types";
+import React, { useState, useEffect } from "react";
+import type { ShoppingList } from "../../types";
 import { ShoppingListDetail } from "./ShoppingListDetail";
+import { useShoppingListSync } from "./useShoppingListSync"; // adjust import path if needed
 import "./ShoppingListPanel.css";
 
 interface Props {
@@ -8,41 +9,56 @@ interface Props {
     selectedList: ShoppingList | null;
     setSelectedList: React.Dispatch<React.SetStateAction<ShoppingList | null>>;
     setShoppingLists: React.Dispatch<React.SetStateAction<ShoppingList[]>>;
+    handleDeleteList: (id?: string) => Promise<void>;
 }
 
 export const ShoppingListPanel: React.FC<Props> = ({
     selectedList,
     setSelectedList,
     setShoppingLists,
+    handleDeleteList
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [newItem, setNewItem] = useState("");
     const [showDetail, setShowDetail] = useState(false);
 
-    const updateItems = (updatedItems: ShoppingListItem[]) => {
+    // Integrate the hook
+    const { items, updateItems, setItemsDirect } = useShoppingListSync(
+        selectedList?.id ?? null,
+        selectedList?.items ?? []
+    );
+
+    // Sync hook’s items with selectedList (UI consistency)
+    useEffect(() => {
+        if (selectedList?.id) {
+            setItemsDirect(selectedList.items);
+        }
+    }, [selectedList?.id]);
+
+    // Keep parent state (shoppingLists) in sync when items change
+    useEffect(() => {
         if (!selectedList) return;
-        const updatedList = { ...selectedList, items: updatedItems };
+        const updatedList = { ...selectedList, items };
         setSelectedList(updatedList);
         setShoppingLists(prev =>
             prev.map(l => (l.id === updatedList.id ? updatedList : l))
         );
-    };
+    }, [items, selectedList, setSelectedList, setShoppingLists]);
 
     const addItem = () => {
-        if (!newItem.trim() || !selectedList) return;
-        updateItems([...selectedList.items, { name: newItem.trim(), checked: false }]);
+        console.log(newItem)
+        if (!newItem.trim()) return;
+        updateItems([...items, { name: newItem.trim(), checked: false }]);
+        console.log(items)
         setNewItem("");
     };
 
     const deleteItem = (idx: number) => {
-        if (!selectedList) return;
-        const updated = selectedList.items.filter((_, i) => i !== idx);
-        updateItems(updated);
+        updateItems(items.filter((_, i) => i !== idx));
     };
 
     const toggleItem = (idx: number) => {
-        if (!selectedList) return;
-        const updated = [...selectedList.items];
+        const updated = [...items];
         updated[idx].checked = !updated[idx].checked;
         updateItems(updated);
     };
@@ -53,13 +69,13 @@ export const ShoppingListPanel: React.FC<Props> = ({
     };
 
     // Whenever a new list is selected, show the panel
-    React.useEffect(() => {
+    useEffect(() => {
         if (selectedList) setShowDetail(true);
     }, [selectedList]);
 
     return (
         <ShoppingListDetail
-            list={selectedList}
+            list={selectedList ? { ...selectedList, items } : null}
             isVisible={showDetail}
             onClose={handleClose}
             isEditing={isEditing}
@@ -70,6 +86,7 @@ export const ShoppingListPanel: React.FC<Props> = ({
             toggleItem={toggleItem}
             deleteItem={deleteItem}
             onUpdate={updateItems}
+            handleDeleteList={handleDeleteList}
         />
     );
 };

@@ -132,7 +132,6 @@ export default function ShoppingListPage() {
                 ) : (
                     <ul className="shopping-lists">
                         {shoppingLists.map((list) => {
-                            console.log(list);
                             return (
                                 <ShoppingListCard
                                     key={list.id}
@@ -154,6 +153,7 @@ export default function ShoppingListPage() {
                     setSelectedList={setSelectedList}
                     setShoppingLists={setShoppingLists}
                     shoppingLists={shoppingLists}
+                    handleDeleteList={handleDeleteList}
                 />
             )}
         </div>

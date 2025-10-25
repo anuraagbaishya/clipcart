@@ -7,58 +7,6 @@
     font-family: "Nunito", sans-serif;
 }
 
-.top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    /* logo left, button right */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--bg);
-    border-bottom: 2px solid var(--accent);
-    padding: 1rem 2rem;
-    z-index: 1000;
-    box-sizing: border-box;
-}
-
-.top-bar-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.top-bar .logo {
-    height: 1.5rem;
-    width: auto;
-}
-
-.top-bar span {
-    font-size: 1.5em;
-    color: var(--accent);
-}
-
-.top-bar-right {
-    display: flex;
-    gap: 0.5em;
-}
-
-.top-bar-button {
-    background: var(--accent);
-    color: var(--fg);
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition);
-}
-
-.home-button:hover {
-    background: var(--accent-hover);
-}
-
 .recipe-panel-wrapper {
     display: flex;
     gap: 1rem;
@@ -67,8 +15,6 @@
     padding: 1rem;
     height: calc(100vh - 80px);
 }
-
-
 
 .shopping-list-button:hover {
     background-color: var(--accent-hover);

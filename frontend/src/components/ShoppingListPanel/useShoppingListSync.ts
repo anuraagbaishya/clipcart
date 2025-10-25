@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-export interface ShoppingListItem {
-    name: string;
-    checked: boolean;
-}
+import type { ShoppingListItem } from "../../types";
 
 export function useShoppingListSync(
     listId: string | null,
@@ -24,7 +20,7 @@ export function useShoppingListSync(
             await fetch("/api/shopping_list/update", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, items: itemsToSave }),
+                body: JSON.stringify({ id: id, items: itemsToSave }),
             });
             setDirty(false);
             console.log(`Shopping list ${id} saved!`);

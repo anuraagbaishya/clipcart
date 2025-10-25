@@ -101,6 +101,10 @@
     position: relative;
 }
 
+.recipe-detail-inner a {
+    color: var(--accent);
+}
+
 /* Close button */
 .close-button {
     position: absolute;

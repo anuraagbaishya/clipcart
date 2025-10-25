@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import clipcart from "../../assets/clipcart.png";
+import { useLocation } from "react-router-dom";
 import RecipePanel from "../../components/RecipePanel/RecipePanel";
 import type { Recipe, RecipeList } from "../../types";
 import "./Recipes.css";
+import { TopBar } from "../../components/TopBar/TopBar";
 
 export default function Recipes() {
     const [recipes, setRecipes] = useState<RecipeList>({ recipes: [] });
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-    const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
@@ -36,24 +35,7 @@ export default function Recipes() {
     return (
         <div className="recipes-page">
             {/* Top Bar */}
-            <div className="top-bar">
-                {/* Left: Logo and title */}
-                <div className="top-bar-left">
-                    <img src={clipcart} alt="Clipcart Logo" className="logo" />
-                    <span>Clipcart</span>
-                </div>
-
-                {/* Right: Home button */}
-                <div className="top-bar-right">
-                    <button className="top-bar-button" onClick={() => navigate("/addRecipe")}>
-                        Add Recipe
-                    </button>
-                    <button className="top-bar-button" onClick={() => navigate("/")}>
-                        Home
-                    </button>
-                </div>
-
-            </div>
+            <TopBar />
 
             {/* Recipe List + Detail */}
             <RecipePanel

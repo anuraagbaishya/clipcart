@@ -194,6 +194,10 @@
     cursor: pointer;
 }
 
+.close-button:hover {
+    transform: scale(1.1);
+}
+
 /* Checklist inside panel */
 .checklist {
     list-style: none;
@@ -302,16 +306,21 @@
     background-color: #d63704;
 }
 
-/* -------------------- Optional Confirm Modal -------------------- */
+/* -------------------- Confirm Modal -------------------- */
 .confirm-modal {
-    position: absolute;
+    position: fixed;
+    top: 85%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     bottom: 1rem;
-    left: 1rem;
     right: 1rem;
     background-color: rgba(0, 0, 0, 0.85);
     padding: 1rem;
     border-radius: var(--radius);
     text-align: center;
+    z-index: 9999;
+    color: var(--fg);
+    width: 40%;
 }
 
 .confirm-actions {
@@ -334,4 +343,11 @@
 
 .confirm-actions button:hover {
     background-color: #d63704;
+}
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
 }

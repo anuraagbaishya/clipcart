@@ -1,5 +1,6 @@
 import clipcart from "../../assets/clipcart.png";
 import { useNavigate } from "react-router-dom";
+import "./TopBar.css"
 
 export const TopBar = () => {
     const navigate = useNavigate();
@@ -13,11 +14,8 @@ export const TopBar = () => {
                 <button className="top-bar-button" onClick={() => navigate("/recipes")}>
                     View Recipes
                 </button>
-                <button className="top-bar-button" onClick={() => navigate("/addRecipe")}>
-                    Add Recipe
-                </button>
                 <button className="top-bar-button" onClick={() => navigate("/")}>
-                    Home
+                    Add Recipe
                 </button>
             </div>
         </div>

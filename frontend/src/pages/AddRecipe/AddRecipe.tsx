@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import clipcart from "../../assets/clipcart.png";
+import { TopBar } from "../../components/TopBar/TopBar";
 import "./AddRecipe.css";
 
 export default function AddRecipe() {
@@ -44,22 +44,7 @@ export default function AddRecipe() {
 
     return (
         <div className="add-recipe-page">
-            <div className="top-bar">
-                {/* Left: Logo and title */}
-                <div className="top-bar-left">
-                    <img src={clipcart} alt="Clipcart Logo" className="logo" />
-                    <span>Clipcart</span>
-                </div>
-
-                <div className="top-bar-right">
-                    <button className="top-bar-button" onClick={() => navigate("/recipes")}>
-                        View Recipes
-                    </button>
-                    <button className="top-bar-button" onClick={() => navigate("/")}>
-                        Home
-                    </button>
-                </div>
-            </div>
+            <TopBar />
             <div className="add-recipe-container">
                 <h2>Add New Recipe</h2>
                 <form className="add-recipe-form" onSubmit={handleSubmit}>

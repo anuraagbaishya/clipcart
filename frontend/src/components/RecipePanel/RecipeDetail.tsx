@@ -12,7 +12,15 @@ const RecipeDetail: React.FC<Props> = ({ recipe, isVisible, onClose }) => (
         {recipe && (
             <div className="recipe-detail-inner">
                 <button className="close-button" onClick={onClose}>×</button>
-                <h2>{recipe.title}</h2>
+                <h2>
+                    {recipe.url ? (
+                        <a href={recipe.url} target="_blank" rel="noopener noreferrer">
+                            {recipe.title}
+                        </a>
+                    ) : (
+                        recipe.title
+                    )}
+                </h2>
                 <h3>Ingredients</h3>
                 <ul className="ingredients-list">
                     {recipe.measuredIngredients.map((i, idx) => <li key={idx}>{i}</li>)}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { ShoppingList, ShoppingListItem } from "../../types";
 
 interface Props {
@@ -6,8 +6,6 @@ interface Props {
     isVisible: boolean;
     onClose: () => void;
     onUpdate: (updatedItems: ShoppingListItem[]) => void;
-
-    // New props
     isEditing: boolean;
     setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
     newItem: string;
@@ -15,6 +13,8 @@ interface Props {
     addItem: () => void;
     toggleItem: (idx: number) => void;
     deleteItem: (idx: number) => void;
+    handleDeleteList: (id?: string) => Promise<void>;
+
 }
 
 export const ShoppingListDetail: React.FC<Props> = ({
@@ -28,62 +28,99 @@ export const ShoppingListDetail: React.FC<Props> = ({
     addItem,
     toggleItem,
     deleteItem,
+    handleDeleteList
 }) => {
-    // if (!list) return null;
-
-    console.log("ShoppingListDetail visible?", isVisible);
+    const [showConfirm, setShowConfirm] = useState(false)
 
     return (
-        <div className={`shoppinglist-detail ${isVisible ? "slide-in" : "slide-out"}`}>
-            {list && (
-                <div className="shoppinglist-detail-inner">
-                    <button className="close-button" onClick={onClose}>
-                        ×
-                    </button>
-                    <h2>{list.name}</h2>
-
-                    <ul className="checklist">
-                        {list.items.map((item, idx) => (
-                            <li
-                                key={idx}
-                                className={`${item.checked ? "checked" : ""} ${isEditing ? "editing" : ""}`}
-                            >
-                                {isEditing ? (
-                                    <>
-                                        <span>{item.name}</span>
-                                        <button onClick={() => deleteItem(idx)}>✕</button>
-                                    </>
-                                ) : (
-                                    <div onClick={() => toggleItem(idx)}>
-                                        <input type="checkbox" checked={item.checked} readOnly />
-                                        <span>{item.name}</span>
-                                    </div>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-
-                    {isEditing && (
-                        <div className="add-item-row">
-                            <input
-                                type="text"
-                                placeholder="New item..."
-                                value={newItem}
-                                onChange={(e) => setNewItem(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && addItem()}
-                            />
-                            <button onClick={addItem}>+</button>
-                        </div>
-                    )}
-
-                    <div className="button-row">
-                        <button onClick={() => setIsEditing((prev) => !prev)}>
-                            {isEditing ? "Save" : "Edit"}
+        <>
+            <div className={`shoppinglist-detail ${isVisible ? "slide-in" : "slide-out"}`}>
+                {list && (
+                    <div className="shoppinglist-detail-inner">
+                        <button className="close-button" onClick={onClose}>
+                            ×
                         </button>
-                        <button onClick={onClose}>Done</button>
+                        <h2>{list.name}</h2>
+
+                        <ul className="checklist">
+                            {list.items.map((item, idx) => (
+                                <li
+                                    key={idx}
+                                    className={`${item.checked ? "checked" : ""} ${isEditing ? "editing" : ""}`}
+                                >
+                                    {isEditing ? (
+                                        <>
+                                            <span>{item.name}</span>
+                                            <button onClick={() => deleteItem(idx)}>✕</button>
+                                        </>
+                                    ) : (
+                                        <div onClick={() => toggleItem(idx)}>
+                                            <input type="checkbox" checked={item.checked} readOnly />
+                                            <span>{item.name}</span>
+                                        </div>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+
+                        {isEditing && (
+                            <div className="add-item-row">
+                                <input
+                                    type="text"
+                                    placeholder="New item..."
+                                    value={newItem}
+                                    onChange={(e) => setNewItem(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && addItem()}
+                                />
+                                <button onClick={addItem}>+</button>
+                            </div>
+                        )}
+
+                        <div className="button-row">
+                            <button onClick={() => setIsEditing((prev) => !prev)}>
+                                {isEditing ? "Save" : "Edit"}
+                            </button>
+                            <button onClick={() => {
+                                console.log("Show confirm clicked");
+                                setShowConfirm(true);
+                            }}>Done</button>
+                        </div>
+
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+
+            {
+                showConfirm && (
+                    <>
+                        <div className="confirm-overlay" onClick={() => setShowConfirm(false)} />
+                        <div className="confirm-modal">
+                            {list && (
+                                <p>
+                                    Clicking <strong>Done</strong> will <strong>delete this list permanently</strong>.{" "}
+                                    {list.items.filter(item => !item.checked).length > 0 && (
+                                        <>You still have <strong>{list.items.filter(item => !item.checked).length}</strong> incomplete {list.items.filter(item => !item.checked).length === 1 ? "item" : "items"}.</>
+                                    )}
+                                </p>
+                            )}
+                            <div className="confirm-actions">
+                                <button
+                                    onClick={() => {
+                                        setShowConfirm(false);
+                                        {
+                                            list && (handleDeleteList(list.id))
+                                        }
+                                        onClose();
+                                    }}
+                                >
+                                    Yes
+                                </button>
+                                <button onClick={() => setShowConfirm(false)}>Cancel</button>
+                            </div>
+                        </div>
+                    </>
+                )
+            }
+        </>
     );
 };

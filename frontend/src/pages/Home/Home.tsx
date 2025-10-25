@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import clipcart from "../../assets/clipcart.png";
+import aiicon from "../../assets/ai.png"
 import "./Home.css";
 
 export default function Home() {
-    const [url, setUrl] = useState("");
+    const [urlOrPrompt, setUrlOrPrompt] = useState("");
     const navigate = useNavigate();
 
-    const handleExtract = async () => {
-        if (!url.trim()) return;
-
+    async function recipeRequest(apiUrl: string) {
         try {
-            const res = await fetch("/api/recipe/extract", {
+            const res = await fetch(apiUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url }),
+                body: JSON.stringify({ request: urlOrPrompt }),
             });
 
             if (!res.ok) throw new Error("Extraction failed");
@@ -25,7 +24,32 @@ export default function Home() {
             console.error(err);
             alert("Failed to fetch recipe.");
         }
+    }
+
+    const handleExtractRecipeFromUrl = async () => {
+        if (!urlOrPrompt.trim()) return;
+
+        if (!isValidUrl(urlOrPrompt)) {
+            alert("Please enter a valid URL");
+            return
+        }
+
+        recipeRequest("/api/recipe/extract")
     };
+    const handleGenerateRecipe = async () => {
+        if (!urlOrPrompt.trim()) return;
+        console.log(urlOrPrompt)
+        recipeRequest("/api/recipe/generate")
+    }
+
+    function isValidUrl(str: string): boolean {
+        try {
+            new URL(str);
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
     const handleAddManually = () => navigate("/addRecipe");
     const handleViewRecipes = () => navigate("/recipes");
@@ -41,14 +65,19 @@ export default function Home() {
                 <input
                     type="text"
                     className="url-input"
-                    placeholder="Enter recipe URL..."
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleExtract()}
+                    placeholder="Enter recipe URL or idea..."
+                    value={urlOrPrompt}
+                    onChange={(e) => setUrlOrPrompt(e.target.value)}
                 />
-                <button className="add-button" onClick={handleExtract}>
-                    +
-                </button>
+                <div className="primary-buttons">
+                    <button className="add-button" onClick={handleExtractRecipeFromUrl}>
+                        +
+                    </button>
+                    <button className="ai-gen-button" onClick={handleGenerateRecipe}>
+                        <img src={aiicon} />
+                    </button>
+                </div>
+
             </div>
 
             <div className="action-buttons">
