@@ -1,6 +1,8 @@
-from pydantic import BaseModel
 from typing import List
-from .data_models import ShoppingListItem, Recipe
+
+from pydantic import BaseModel
+
+from .data_models import Recipe, ShoppingListItem
 
 
 class RecipeRequest(BaseModel):

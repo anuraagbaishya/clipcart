@@ -1,15 +1,10 @@
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 from bson import ObjectId
 from pymongo import MongoClient
 
-from models import (
-    Recipe,
-    ShoppingListItem,
-    ShoppingList,
-    ShoppingListList,
-    ShoppingListRequest,
-)
+from models import (Recipe, ShoppingList, ShoppingListItem, ShoppingListList,
+                    ShoppingListRequest)
 
 
 class MongoUtils:

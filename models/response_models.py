@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field, ConfigDict, RootModel
-from .data_models import Recipe, ShoppingListItem
 from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, RootModel
+
+from .data_models import Recipe, ShoppingListItem
 
 
 class IdResponse(BaseModel):

@@ -1,6 +1,7 @@
-from .wprm_scraper import WprmScraper
-from .custom_scraper import CustomScraper
 from typing import List, Type
+
+from .custom_scraper import CustomScraper
+from .wprm_scraper import WprmScraper
 
 
 def custom_scraper_base_urls() -> List[str]:

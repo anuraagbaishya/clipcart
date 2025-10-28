@@ -1,36 +1,24 @@
 # main.py
-from fastapi import FastAPI, Request, HTTPException
+import asyncio
+import logging
+import os
+from typing import List, Optional
+from urllib.parse import ParseResult, urlparse
+
+from bson import ObjectId
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from recipe_scrapers import scrape_me
-from typing import List, Optional
-import asyncio
-from urllib.parse import urlparse, ParseResult
-
-from custom_scrapers import custom_scraper_base_urls, get_scrapper, CustomScraper
-
-import logging
-
-from bson import ObjectId
-from models import (
-    RecipeRequest,
-    Recipe,
-    IdResponse,
-    RecipeListResponse,
-    RecipeResponse,
-    OkResponse,
-    AddRecipeRequest,
-    ShoppingListRequest,
-    ShoppingListList,
-    RecipeDetails,
-    UpdateShoppingListRequest,
-    UpdateRecipeRequest,
-)
 
 from ai_tasks import ExtractRecipeDetailsTask, GenerateRecipeTask
-import os
-
+from custom_scrapers import (CustomScraper, custom_scraper_base_urls,
+                             get_scrapper)
+from models import (AddRecipeRequest, IdResponse, OkResponse, Recipe,
+                    RecipeDetails, RecipeListResponse, RecipeRequest,
+                    RecipeResponse, ShoppingListList, ShoppingListRequest,
+                    UpdateRecipeRequest, UpdateShoppingListRequest)
 from mongo_utils import MongoUtils
 
 logging.basicConfig(level=logging.INFO)

@@ -1,9 +1,12 @@
-from .custom_scraper import CustomScraper
-from bs4 import BeautifulSoup
-from bs4.element import Tag, ResultSet
-from typing import Optional, List
-from models import Recipe, Ingredients
 import logging
+from typing import List, Optional
+
+from bs4 import BeautifulSoup
+from bs4.element import ResultSet, Tag
+
+from models import Ingredients, Recipe
+
+from .custom_scraper import CustomScraper
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

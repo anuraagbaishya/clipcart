@@ -1,10 +1,11 @@
 import logging
-from typing import cast, List, Optional
-
-from models.data_models import RecipeDetails
-from .ai_task import AiTask
+from typing import List, Optional, cast
 
 from google.genai import types
+
+from models.data_models import RecipeDetails
+
+from .ai_task import AiTask
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("google_genai").setLevel(logging.WARNING)
