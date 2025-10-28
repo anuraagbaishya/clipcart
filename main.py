@@ -6,6 +6,9 @@ from fastapi.templating import Jinja2Templates
 from recipe_scrapers import scrape_me
 from typing import List, Optional
 import asyncio
+from urllib.parse import urlparse, ParseResult
+
+from custom_scrapers import custom_scraper_base_urls, get_scrapper, CustomScraper
 
 import logging
 
@@ -22,9 +25,10 @@ from models import (
     ShoppingListList,
     RecipeDetails,
     UpdateShoppingListRequest,
+    UpdateRecipeRequest,
 )
 
-from AiTasks import ExtractRecipeDetailsTask, GenerateRecipeTask
+from ai_tasks import ExtractRecipeDetailsTask, GenerateRecipeTask
 import os
 
 from mongo_utils import MongoUtils
@@ -54,32 +58,51 @@ async def index(request: Request):
 @app.post("/api/recipe/extract", response_model=IdResponse)
 async def extract_recipe_from_url(data: RecipeRequest) -> IdResponse:
     url: str = data.request
+    parsed: ParseResult = urlparse(url)
+    base_url: str = f"{parsed.scheme}://{parsed.netloc}"
 
-    try:
-        scraper = scrape_me(url)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to scrape URL: {e}")
+    ai_supplement = False
 
-    measured_ingredients: List[str] = scraper.ingredients()
-    instructions: str = scraper.instructions()
-    title: str = scraper.title()
+    if base_url in custom_scraper_base_urls():
+        try:
+            custom_scraper: CustomScraper = get_scrapper(base_url)()
+            recipe = custom_scraper.scrape(url)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to scrape {url}: {e}")
+    else:
+        try:
+            scraper = scrape_me(url)
+            measured_ingredients: List[str] = scraper.ingredients()
+            instructions: str = scraper.instructions()
+            title: str = scraper.title()
 
-    recipe = Recipe(
-        title=title,
-        url=url,
-        measured_ingredients=measured_ingredients,  # type: ignore
-        instructions=instructions,
-    )  # type: ignore
+            recipe = Recipe(
+                title=title,
+                url=url,
+                measured_ingredients=measured_ingredients,  # type: ignore
+                instructions=instructions,
+            )  # type: ignore
+
+            ai_supplement = True
+
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to scrape {url}: {e}")
+
+    if not recipe:
+        raise HTTPException(
+            status_code=400, detail=f"Failed to scrape {url}, no recipe found."
+        )
 
     logging.info(f"extracted recipe: {recipe.title}")
 
     recipe_id: ObjectId = mongo.add_recipe(recipe)
 
-    asyncio.create_task(
-        asyncio.to_thread(
-            update_ingredients_in_recipe, recipe_id, title, measured_ingredients
+    if ai_supplement:
+        asyncio.create_task(
+            asyncio.to_thread(
+                update_ingredients_in_recipe, recipe_id, title, measured_ingredients
+            )
         )
-    )
 
     return IdResponse(id=str(recipe_id))  # type: ignore
 
@@ -158,6 +181,22 @@ def create_shopping_list(data: ShoppingListRequest) -> IdResponse:
     return IdResponse(id=str(shopping_list_id))
 
 
+@app.post("/api/recipe/update", response_model=OkResponse)
+async def update_recipe(data: UpdateRecipeRequest):
+    mongo.update_recipe(data.id, data.recipe)
+
+    asyncio.create_task(
+        asyncio.to_thread(
+            update_ingredients_in_recipe,
+            ObjectId(data.id),
+            data.recipe.title,
+            data.recipe.ingredients,
+        )
+    )
+
+    return OkResponse()
+
+
 @app.post("/api/shopping_list/update", response_model=OkResponse)
 def update_shopping_list(data: UpdateShoppingListRequest) -> OkResponse:
     mongo.update_shopping_list(data.id, data.items)
@@ -186,7 +225,7 @@ def update_ingredients_in_recipe(
             return None
 
         mongo.update_recipe_details(
-            id, recipe_details.ingredients, recipe_details.cuisine
+            id, recipe_details.ingredients, recipe_details.cuisine.capitalize()
         )
         logging.info(f"recipe details updated for {dish_name}")
     except RuntimeError as e:

@@ -11,6 +11,9 @@ export const TopBar = () => {
                 <span>Clipcart</span>
             </div>
             <div className="top-bar-right">
+                <button className="top-bar-button" onClick={() => navigate("/shoppingList")}>
+                    Shopping List
+                </button>
                 <button className="top-bar-button" onClick={() => navigate("/recipes")}>
                     View Recipes
                 </button>

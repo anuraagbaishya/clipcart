@@ -88,10 +88,35 @@ export default function ShoppingListPage() {
 
     const handleSelectExisting = () => {
         const existing = shoppingLists.find(l => l.id === selectedExisting);
-        if (existing) setSelectedList(existing);
+        if (existing) {
+            const updatedItems = [
+                ...existing.items, // keep all existing items
+                ...modalItems
+                    .filter(mi => !existing.items.some(ei => ei.name === mi.name)) // only new items
+                    .map(i => ({ ...i, checked: false })), // reset checked
+            ];
+
+            const updatedList: ShoppingList = { ...existing, items: updatedItems };
+            setSelectedList(updatedList);
+
+            updateShoppingList(updatedList)
+        }
         setShowModal(false);
     };
 
+    const updateShoppingList = async (updatedList: ShoppingList) => {
+        try {
+            const res = await fetch("/api/shopping_list/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedList),
+            });
+            if (!res.ok) throw new Error("Failed to save shopping list");
+            console.log("Shopping list saved!");
+        } catch (err) {
+            console.error("Error saving shopping list:", err);
+        }
+    };
 
     const handleDeleteList = async (id?: string) => {
         if (!id) return;
@@ -154,6 +179,7 @@ export default function ShoppingListPage() {
                     setShoppingLists={setShoppingLists}
                     shoppingLists={shoppingLists}
                     handleDeleteList={handleDeleteList}
+                    handleUpdateList={updateShoppingList}
                 />
             )}
         </div>

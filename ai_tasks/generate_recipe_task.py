@@ -1,7 +1,7 @@
 import logging
 from typing import cast, Optional
 
-from models.data_models import Recipe
+from models import Recipe
 from .ai_task import AiTask
 
 from google.genai import types

@@ -56,6 +56,19 @@ class MongoUtils:
             {"_id": id}, {"$set": {"ingredients": ingredients, "cuisine": cusine}}
         )
 
+    def update_recipe(self, id: str, recipe: Recipe) -> None:
+        self.recipes_collection.update_one(
+            {"_id": ObjectId(id)},
+            {
+                "$set": {
+                    "title": recipe.title,
+                    "ingredients": recipe.ingredients,
+                    "measured_ingredients": recipe.measured_ingredients,
+                    "instructions": recipe.instructions,
+                },
+            },
+        )
+
     def find_recipes_by_ids(self, ids: List[str]) -> List[Recipe]:
         object_ids = [ObjectId(_id) for _id in ids]
 

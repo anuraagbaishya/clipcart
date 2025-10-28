@@ -130,10 +130,78 @@
     border-radius: 0.5rem;
 }
 
-.instructions-list {
+.ingredients-list li input[type="text"] {
+    width: 90%;
+    padding: 0.25rem;
+    border-radius: var(--list-radius);
+    border: none;
+    background-color: #222;
+    color: var(--fg);
+}
+
+.ingredients-list button {
+    background: none;
+    color: var(--accent);
+    border: none;
+    outline: none;
+}
+
+.ingredients-list button:hover {
+    transform: scale(1.2);
+}
+
+.add-ingredient-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.add-ingredient-row input {
+    flex: 1;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--list-radius);
+    border: none;
+    background-color: var(--card-bg);
+    color: var(--fg);
+    font-family: inherit;
+}
+
+.add-ingredient-row button {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0.6rem 0.75rem;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--list-radius);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.instructions {
     background: var(--card-bg);
     padding: 1em;
     border-radius: var(--list-radius);
+}
+
+.recipe-title-input,
+.recipe-cuisine-input,
+.instructions-edit textarea {
+    background: var(--card-bg);
+    padding: 1em;
+    border-radius: var(--list-radius);
+    color: var(--fg);
+}
+
+.recipe-title-input,
+.recipe-cuisine-input {
+    border: none;
+    outline: none;
 }
 
 /* ----------------- Shopping List Button ----------------- */
@@ -159,6 +227,10 @@
 }
 
 /* ----------------- Filter Panel ----------------- */
+::placeholder {
+    color: var(--placeholder);
+}
+
 .filter-panel {
     width: 500px;
     flex-shrink: 0;
@@ -171,32 +243,33 @@
     margin-left: 3em;
 }
 
-.favorite-checkbox label {
-    font-size: 1.5em;
-}
-
-.favorite-checkbox input[type="checkbox"] {
-    accent-color: var(--accent);
-    width: 16px;
-    height: 16px;
+.filter-panel-input {
+    width: 100%;
 }
 
 .filter-panel-input p {
     font-size: 1.5em;
 }
 
-.filter-panel-text-input {
+.filter-panel-text-input,
+.filter-panel-select {
     width: 100%;
-    background: transparent;
-    border: 2px solid var(--accent);
     padding: 0.5rem;
     border-radius: var(--list-radius);
+    border: 2px solid var(--accent);
     font-size: 1em;
     background: var(--card-bg);
     color: var(--fg);
+    box-sizing: border-box;
+    /* ensure padding/border included in width */
 }
 
-.ingredient-bubbles {
+.filter-panel-select {
+    color: var(--placeholder);
+}
+
+.ingredient-bubbles,
+.cuisine-bubbles {
     display: flex;
     flex-wrap: wrap;
     gap: 0.3rem;

@@ -22,6 +22,11 @@ class ShoppingListList(BaseModel):
     lists: List[ShoppingList]
 
 
+class Ingredients(BaseModel):
+    ingredients: Optional[List[str]]
+    measured_ingredients: Optional[List[str]]
+
+
 class Recipe(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     title: str

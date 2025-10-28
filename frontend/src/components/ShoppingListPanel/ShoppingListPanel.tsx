@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import type { ShoppingList } from "../../types";
+import type { ShoppingList, ShoppingListItem } from "../../types";
 import { ShoppingListDetail } from "./ShoppingListDetail";
-import { useShoppingListSync } from "./useShoppingListSync"; // adjust import path if needed
 import "./ShoppingListPanel.css";
 
 interface Props {
@@ -10,74 +9,72 @@ interface Props {
     setSelectedList: React.Dispatch<React.SetStateAction<ShoppingList | null>>;
     setShoppingLists: React.Dispatch<React.SetStateAction<ShoppingList[]>>;
     handleDeleteList: (id?: string) => Promise<void>;
+    handleUpdateList: (shoppingList: ShoppingList) => Promise<void>;
 }
 
 export const ShoppingListPanel: React.FC<Props> = ({
     selectedList,
     setSelectedList,
     setShoppingLists,
-    handleDeleteList
+    handleDeleteList,
+    handleUpdateList,
+
 }) => {
+    const [localList, setLocalList] = useState<ShoppingList | null>(selectedList);
     const [isEditing, setIsEditing] = useState(false);
     const [newItem, setNewItem] = useState("");
     const [showDetail, setShowDetail] = useState(false);
 
-    // Integrate the hook
-    const { items, updateItems, setItemsDirect } = useShoppingListSync(
-        selectedList?.id ?? null,
-        selectedList?.items ?? []
-    );
-
-    // Sync hook’s items with selectedList (UI consistency)
     useEffect(() => {
-        if (selectedList?.id) {
-            setItemsDirect(selectedList.items);
-        }
-    }, [selectedList?.id]);
-
-    // Keep parent state (shoppingLists) in sync when items change
-    useEffect(() => {
-        if (!selectedList) return;
-        const updatedList = { ...selectedList, items };
-        setSelectedList(updatedList);
-        setShoppingLists(prev =>
-            prev.map(l => (l.id === updatedList.id ? updatedList : l))
-        );
-    }, [items, selectedList, setSelectedList, setShoppingLists]);
+        setLocalList(selectedList);
+        if (selectedList) setShowDetail(true);
+    }, [selectedList]);
 
     const addItem = () => {
-        console.log(newItem)
-        if (!newItem.trim()) return;
-        updateItems([...items, { name: newItem.trim(), checked: false }]);
-        console.log(items)
+        if (!newItem.trim() || !localList) return;
+        const updatedItems: ShoppingListItem[] = [
+            ...localList.items,
+            { name: newItem.trim(), checked: false }
+        ];
+        handleUpdate({ ...localList, items: updatedItems });
         setNewItem("");
     };
 
     const deleteItem = (idx: number) => {
-        updateItems(items.filter((_, i) => i !== idx));
+        if (!localList) return;
+        const updatedItems = localList.items.filter((_, i) => i !== idx);
+        handleUpdate({ ...localList, items: updatedItems });
     };
 
     const toggleItem = (idx: number) => {
-        const updated = [...items];
-        updated[idx].checked = !updated[idx].checked;
-        updateItems(updated);
+        if (!localList) return;
+        const updatedItems = [...localList.items];
+        updatedItems[idx].checked = !updatedItems[idx].checked;
+        handleUpdate({ ...localList, items: updatedItems });
     };
 
     const handleClose = () => {
         setShowDetail(false);
-        setTimeout(() => setSelectedList(null), 300); // wait for slide-out
+        setTimeout(() => setSelectedList(null), 300);
     };
 
-    // Whenever a new list is selected, show the panel
-    useEffect(() => {
-        if (selectedList) setShowDetail(true);
-    }, [selectedList]);
+    const handleUpdate = (updatedList: ShoppingList) => {
+        setLocalList(updatedList);
+        setSelectedList(updatedList);
+        setShoppingLists(prev =>
+            prev.map(l => (l.id === updatedList.id ? updatedList : l))
+        );
+        handleUpdateList(updatedList)
+    }
+
+    if (!localList) return null;
 
     return (
         <ShoppingListDetail
-            list={selectedList ? { ...selectedList, items } : null}
+            list={localList}
             isVisible={showDetail}
             onClose={handleClose}
+            onUpdate={handleUpdate}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             newItem={newItem}
@@ -85,7 +82,6 @@ export const ShoppingListPanel: React.FC<Props> = ({
             addItem={addItem}
             toggleItem={toggleItem}
             deleteItem={deleteItem}
-            onUpdate={updateItems}
             handleDeleteList={handleDeleteList}
         />
     );

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List
-from .data_models import ShoppingListItem
+from .data_models import ShoppingListItem, Recipe
 
 
 class RecipeRequest(BaseModel):
@@ -20,4 +20,10 @@ class ShoppingListRequest(BaseModel):
 
 class UpdateShoppingListRequest(BaseModel):
     id: str
+    name: str
     items: List[ShoppingListItem]
+
+
+class UpdateRecipeRequest(BaseModel):
+    id: str
+    recipe: Recipe

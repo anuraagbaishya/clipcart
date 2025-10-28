@@ -15,14 +15,22 @@ interface Props {
 
 const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe, setRecipes }) => {
     const [menuIds, setMenuIds] = useState<string[]>([]);
-    const [favoritesOnly, setFavoritesOnly] = useState(false);
     const [ingredientInput, setIngredientInput] = useState("");
     const [ingredientsFilter, setIngredientsFilter] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>(recipes.recipes);
+    const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+    const [cuisineOptions, setCuisineOptions] = useState<string[]>([]);
+
+    const [isEditing, setIsEditing] = useState(false);
+
     const navigate = useNavigate();
 
     useEffect(() => setFilteredRecipes(recipes.recipes), [recipes.recipes]);
+    useEffect(() => {
+        const cuisines = Array.from(new Set(recipes.recipes.map(r => r.cuisine).filter(Boolean)));
+        setCuisineOptions(cuisines);
+    }, [recipes.recipes]);
 
     useEffect(() => {
         const stored = localStorage.getItem("menu");
@@ -40,13 +48,41 @@ const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe,
             );
         }
 
+        if (selectedCuisines.length > 0) {
+            updated = updated.filter(r => selectedCuisines.includes(r.cuisine));
+        }
+
         if (searchTerm.trim() !== "") {
             const term = searchTerm.toLowerCase();
             updated = updated.filter(r => r.title.toLowerCase().includes(term));
         }
 
         setFilteredRecipes(updated);
-    }, [recipes.recipes, ingredientsFilter, searchTerm]);
+    }, [recipes.recipes, ingredientsFilter, selectedCuisines, searchTerm]);
+
+    const updateRecipe = async (updated: Recipe) => {
+        // 1. Update local state immediately (UI update)
+        if (setRecipes) {
+            setRecipes(prev => ({
+                recipes: prev.recipes.map(r => r._id === updated._id ? updated : r)
+            }));
+        }
+        onSelectRecipe(updated);
+
+        try {
+            const res = await fetch("/api/recipe/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: updated._id, recipe: updated }),
+            });
+            if (!res.ok) throw new Error("Failed to save recipe");
+            console.log("Recipe saved successfully!");
+        } catch (err) {
+            console.error("Error saving recipe:", err);
+            alert("Failed to save recipe. Please try again.");
+        }
+    };
+
 
     const toggleMenu = (id: string) => {
         const newMenu = menuIds.includes(id)
@@ -104,25 +140,29 @@ const RecipePanel: React.FC<Props> = ({ recipes, selectedRecipe, onSelectRecipe,
             />
 
             <FilterPanel
-                favoritesOnly={favoritesOnly}
-                setFavoritesOnly={setFavoritesOnly}
                 ingredientInput={ingredientInput}
                 setIngredientInput={setIngredientInput}
                 ingredientsFilter={ingredientsFilter}
                 setIngredientsFilter={setIngredientsFilter}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                cuisineOptions={cuisineOptions}
+                selectedCuisines={selectedCuisines}
+                setSelectedCuisines={setSelectedCuisines}
             />
 
             <RecipeDetail
                 recipe={selectedRecipe}
                 isVisible={!!selectedRecipe}
                 onClose={() => onSelectRecipe(null)}
+                onUpdate={updateRecipe}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
             />
 
             {menuIds.length > 0 && (
                 <button className="shopping-list-button" onClick={handleShoppingList}>
-                    Shopping List
+                    Create Shopping List
                 </button>
             )}
         </div>

@@ -227,6 +227,15 @@
     accent-color: var(--accent);
 }
 
+.checklist li input[type="text"] {
+    flex-grow: 1;
+    padding: 0.25rem;
+    border-radius: var(--list-radius);
+    border: none;
+    background-color: #222;
+    color: var(--fg);
+}
+
 .checklist button {
     background: none;
     color: var(--accent);

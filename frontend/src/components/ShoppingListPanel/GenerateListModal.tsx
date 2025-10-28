@@ -60,7 +60,7 @@ export const GenerateListModal: React.FC<Props> = ({
                         ))}
                     </select>
                     <button onClick={handleSelectExisting} disabled={!selectedExisting}>
-                        Open
+                        Update
                     </button>
                 </div>
             </div>

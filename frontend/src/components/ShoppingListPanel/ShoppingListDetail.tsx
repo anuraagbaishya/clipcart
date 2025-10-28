@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import type { ShoppingList, ShoppingListItem } from "../../types";
+import type { ShoppingList } from "../../types";
 
 interface Props {
     list: ShoppingList | null;
     isVisible: boolean;
     onClose: () => void;
-    onUpdate: (updatedItems: ShoppingListItem[]) => void;
+    onUpdate: (updatedItems: ShoppingList) => void;
     isEditing: boolean;
     setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
     newItem: string;
@@ -21,6 +21,7 @@ export const ShoppingListDetail: React.FC<Props> = ({
     list,
     isVisible,
     onClose,
+    onUpdate,
     isEditing,
     setIsEditing,
     newItem,
@@ -50,7 +51,16 @@ export const ShoppingListDetail: React.FC<Props> = ({
                                 >
                                     {isEditing ? (
                                         <>
-                                            <span>{item.name}</span>
+                                            <input
+                                                type="text"
+                                                value={item.name}
+                                                onChange={(e) => {
+                                                    const updatedItems = [...list.items];
+                                                    updatedItems[idx].name = e.target.value;
+                                                    onUpdate(list);
+                                                }}
+                                                style={{ flexGrow: 1, marginRight: "0.5rem" }}
+                                            />
                                             <button onClick={() => deleteItem(idx)}>✕</button>
                                         </>
                                     ) : (
