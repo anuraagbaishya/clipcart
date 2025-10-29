@@ -4,9 +4,9 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/static/js/',           // matches Flask static route
+  base: '/static/',
   build: {
-    outDir: path.resolve(__dirname, '../static/js'), // build output to Flask static
+    outDir: path.resolve(__dirname, '../static'),
     emptyOutDir: true,
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
