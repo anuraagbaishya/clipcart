@@ -15,11 +15,12 @@ from recipe_scrapers import scrape_me
 from ai_tasks import ExtractRecipeDetailsTask, GenerateRecipeTask
 from custom_scrapers import (CustomScraper, custom_scraper_base_urls,
                              get_scrapper)
-from models import (AddRecipeRequest, IdResponse, OkResponse, Recipe,
-                    RecipeDetails, RecipeListResponse, RecipeRequest,
+from models import (AddRecipeRequest, IdResponse, NotionPageId, OkResponse,
+                    Recipe, RecipeDetails, RecipeListResponse, RecipeRequest,
                     RecipeResponse, ShoppingListList, ShoppingListRequest,
                     UpdateRecipeRequest, UpdateShoppingListRequest)
 from mongo_utils import MongoUtils
+from notion.notion_utils import NotionUtils
 
 logging.basicConfig(level=logging.INFO)
 
@@ -195,6 +196,26 @@ def update_shopping_list(data: UpdateShoppingListRequest) -> OkResponse:
 @app.delete("/api/shopping_list/delete", response_model=OkResponse)
 def delete_shopping_list(id: str) -> OkResponse:
     mongo.delete_shopping_list(id)
+
+    return OkResponse()
+
+
+@app.post("/api/notion/sync", response_model=OkResponse)
+def sync_list_with_notion(data: UpdateShoppingListRequest) -> OkResponse:
+    notion_id = mongo.find_notion_page_id(data.id)
+
+    logging.info(f"Notion ID: {notion_id}")
+
+    notion = NotionUtils()
+    items = [d.name for d in data.items]
+    if not notion_id:
+        new_page_id = notion.create_new_page(data.name, items)
+        mongo.insert_notion_page_id(
+            NotionPageId(internal_id=data.id, notion_page_id=new_page_id)
+        )
+
+    else:
+        notion.update_page(notion_id.notion_page_id, data.name, items)
 
     return OkResponse()
 

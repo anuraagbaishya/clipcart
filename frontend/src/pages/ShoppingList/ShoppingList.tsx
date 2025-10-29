@@ -119,7 +119,6 @@ export default function ShoppingListPage() {
     };
 
     const handleDeleteList = async (id?: string) => {
-        console.log(id)
         if (!id) return;
 
         try {
@@ -135,6 +134,29 @@ export default function ShoppingListPage() {
         setShoppingLists(prev => prev.filter(l => l.id !== id));
         if (selectedList?.id === id) setSelectedList(null);
     }
+
+    const handleSyncList = async (list: ShoppingList) => {
+        console.log(list)
+
+        if (!list.id) {
+            return
+        }
+
+        try {
+            const res = await fetch(`/api/notion/sync`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id: list.id, name: list.name, items: list.items })
+            })
+
+            if (!res.ok) console.log("Sync failed");
+        } catch (err) {
+            console.log("Sync failed", err);
+        }
+    }
+
     return (
         <div className="shopping-list-page">
             <TopBar />
@@ -181,6 +203,7 @@ export default function ShoppingListPage() {
                     shoppingLists={shoppingLists}
                     handleDeleteList={handleDeleteList}
                     handleUpdateList={updateShoppingList}
+                    handleSyncList={handleSyncList}
                 />
             )}
         </div>

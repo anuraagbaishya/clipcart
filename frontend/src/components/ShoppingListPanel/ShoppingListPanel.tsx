@@ -10,6 +10,7 @@ interface Props {
     setShoppingLists: React.Dispatch<React.SetStateAction<ShoppingList[]>>;
     handleDeleteList: (id?: string) => Promise<void>;
     handleUpdateList: (shoppingList: ShoppingList) => Promise<void>;
+    handleSyncList: (shoppingList: ShoppingList) => Promise<void>;
 }
 
 export const ShoppingListPanel: React.FC<Props> = ({
@@ -18,6 +19,7 @@ export const ShoppingListPanel: React.FC<Props> = ({
     setShoppingLists,
     handleDeleteList,
     handleUpdateList,
+    handleSyncList
 
 }) => {
     const [localList, setLocalList] = useState<ShoppingList | null>(selectedList);
@@ -83,6 +85,7 @@ export const ShoppingListPanel: React.FC<Props> = ({
             toggleItem={toggleItem}
             deleteItem={deleteItem}
             handleDeleteList={handleDeleteList}
+            handleSyncList={handleSyncList}
         />
     );
 };

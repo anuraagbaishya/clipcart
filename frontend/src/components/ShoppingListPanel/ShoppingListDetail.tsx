@@ -14,7 +14,7 @@ interface Props {
     toggleItem: (idx: number) => void;
     deleteItem: (idx: number) => void;
     handleDeleteList: (id?: string) => Promise<void>;
-
+    handleSyncList: (list: ShoppingList) => Promise<void>;
 }
 
 export const ShoppingListDetail: React.FC<Props> = ({
@@ -29,7 +29,8 @@ export const ShoppingListDetail: React.FC<Props> = ({
     addItem,
     toggleItem,
     deleteItem,
-    handleDeleteList
+    handleDeleteList,
+    handleSyncList
 }) => {
     const [showConfirm, setShowConfirm] = useState(false)
 
@@ -94,11 +95,14 @@ export const ShoppingListDetail: React.FC<Props> = ({
                                 console.log("Show confirm clicked");
                                 setShowConfirm(true);
                             }}>Done</button>
+                            <button onClick={() => handleSyncList(list)}>
+                                Sync
+                            </button>
                         </div>
 
                     </div>
                 )}
-            </div>
+            </div >
 
             {
                 showConfirm && (

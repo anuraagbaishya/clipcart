@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -40,3 +41,9 @@ class Recipe(BaseModel):
     instructions: str
 
     model_config = ConfigDict({"populate_by_name": True})
+
+
+class NotionPageId(BaseModel):
+    id: Optional[str] = Field(default=None, alias="_id")
+    internal_id: str
+    notion_page_id: str

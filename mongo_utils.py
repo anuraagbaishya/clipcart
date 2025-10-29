@@ -4,8 +4,8 @@ from typing import Any, Dict, List, Optional
 from bson import ObjectId
 from pymongo import MongoClient
 
-from models import (Recipe, ShoppingList, ShoppingListItem, ShoppingListList,
-                    ShoppingListRequest)
+from models import (NotionPageId, Recipe, ShoppingList, ShoppingListItem,
+                    ShoppingListList, ShoppingListRequest)
 
 
 class MongoUtils:
@@ -19,6 +19,7 @@ class MongoUtils:
         self.db = self.client.clipcart
         self.recipes_collection = self.db.recipes
         self.shopping_list_collection = self.db.shopping_list
+        self.notion_page_id_collection = self.db.notion_page_ids
 
     def add_recipe(self, recipe: Recipe) -> ObjectId:
         result = self.recipes_collection.insert_one(recipe.model_dump())
@@ -118,3 +119,14 @@ class MongoUtils:
             shopping_lists.append(shopping_list)
 
         return ShoppingListList(lists=shopping_lists)
+
+    def insert_notion_page_id(self, notion_page_id: NotionPageId) -> None:
+        self.notion_page_id_collection.insert_one(notion_page_id.model_dump())
+
+    def find_notion_page_id(self, internal_id: str) -> Optional[NotionPageId]:
+        item = self.notion_page_id_collection.find_one({"internal_id": internal_id})
+        if not item:
+            return None
+
+        item["_id"] = str(item["_id"])
+        return NotionPageId.model_validate(item)

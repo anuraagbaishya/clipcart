@@ -312,7 +312,7 @@
 }
 
 .button-row button:hover {
-    background-color: #d63704;
+    transform: scale(1.05);
 }
 
 /* -------------------- Confirm Modal -------------------- */

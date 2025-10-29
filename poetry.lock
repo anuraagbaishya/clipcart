@@ -27,6 +27,7 @@ files = [
 [package.dependencies]
 idna = ">=2.8"
 sniffio = ">=1.1"
+typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
 trio = ["trio (>=0.31.0)"]
@@ -791,6 +792,21 @@ html5lib = ">=1.1,<2.0"
 requests = ">=2.28.2,<3.0.0"
 
 [[package]]
+name = "notion-client"
+version = "2.6.0"
+description = "Python client for the official Notion API"
+optional = false
+python-versions = "<4,>=3.8"
+groups = ["main"]
+files = [
+    {file = "notion_client-2.6.0-py2.py3-none-any.whl", hash = "sha256:e19a406252015ac1d1c8822da9322ed01a033a3d6602935d483a0cc23db09880"},
+    {file = "notion_client-2.6.0.tar.gz", hash = "sha256:1e3ff65452ed29a2a044ec2236b38a430e09d8e18911c93ae16c6a2ae0744f60"},
+]
+
+[package.dependencies]
+httpx = ">=0.23.0"
+
+[[package]]
 name = "pyasn1"
 version = "0.6.1"
 description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)"
@@ -1228,6 +1244,7 @@ files = [
 
 [package.dependencies]
 anyio = ">=3.6.2,<5"
+typing-extensions = {version = ">=4.10.0", markers = "python_version < \"3.13\""}
 
 [package.extras]
 full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.18)", "pyyaml"]
@@ -1417,5 +1434,5 @@ files = [
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.13"
-content-hash = "cbbc10004c38df4dfc54c4258d9b1ef05ba722b39fabefb7d6923190a2e0d4cd"
+python-versions = ">=3.11,<4"
+content-hash = "36728c1c23fb0d6ef564a87403d732013f77a4a0e86d4ad37b73e590eb53ab09"
