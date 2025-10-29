@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, List, Optional
 
 from bson import ObjectId
@@ -8,9 +9,13 @@ from models import (Recipe, ShoppingList, ShoppingListItem, ShoppingListList,
 
 
 class MongoUtils:
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.mongo_path: str = "localhost:27017"
-        self.client: MongoClient = MongoClient(f"mongodb://{self.mongo_path}")
+    def __init__(self):
+        self.mongo_user: str = "clipcart_db_admin"
+        self.mongo_passwd: str = os.getenv("MONGODB_PASSWD", "")
+        self.mongo_url = "cluster0.xmqjv4z.mongodb.net/?appName=Cluster0"
+        self.client: MongoClient = MongoClient(
+            f"mongodb+srv://{self.mongo_user}:{self.mongo_passwd}@{self.mongo_url}"
+        )
         self.db = self.client.clipcart
         self.recipes_collection = self.db.recipes
         self.shopping_list_collection = self.db.shopping_list

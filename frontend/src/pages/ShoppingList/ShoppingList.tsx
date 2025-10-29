@@ -119,6 +119,7 @@ export default function ShoppingListPage() {
     };
 
     const handleDeleteList = async (id?: string) => {
+        console.log(id)
         if (!id) return;
 
         try {
