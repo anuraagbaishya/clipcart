@@ -64,10 +64,12 @@ async def extract_recipe_from_url(data: RecipeRequest) -> IdResponse:
             measured_ingredients: List[str] = scraper.ingredients()
             instructions: str = scraper.instructions()
             title: str = scraper.title()
+            img_url: str = scraper.image()
 
             recipe = Recipe(
                 title=title,
                 url=url,
+                img_url=img_url,
                 measured_ingredients=measured_ingredients,  # type: ignore
                 instructions=instructions,
             )  # type: ignore

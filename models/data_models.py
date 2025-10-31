@@ -33,6 +33,7 @@ class Recipe(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     title: str
     url: Optional[str] = Field(default="")
+    img_url: Optional[str] = Field(default="")
     ingredients: List[str] = Field(default_factory=list)
     measured_ingredients: List[str] = Field(
         default_factory=list, alias="measuredIngredients"
