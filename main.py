@@ -45,10 +45,10 @@ async def index(request: Request):
 
 
 @app.post("/api/recipe/add_auto", response_model=IdResponse)
-def extract_or_generate_recipe(data: RecipeRequest) -> IdResponse:
+async def extract_or_generate_recipe(data: RecipeRequest) -> IdResponse:
     try:
         if is_url(data.request):
-            return extract_recipe(data.request)
+            return await extract_recipe(data.request)
 
         return generate_recipe(data.request)
     except Exception as e:
@@ -186,7 +186,7 @@ def get_unique_ingredients(recipes: List[Recipe]) -> List[str]:
     return list(unique_ingredients)
 
 
-def extract_recipe(url):
+async def extract_recipe(url):
     parsed: ParseResult = urlparse(url)
     base_url: str = f"{parsed.scheme}://{parsed.netloc}"
 
