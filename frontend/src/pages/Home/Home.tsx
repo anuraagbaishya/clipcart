@@ -34,12 +34,12 @@ export default function Home() {
             return
         }
 
-        recipeRequest("/api/recipe/extract")
+        recipeRequest("/api/recipe/add_auto")
     };
     const handleGenerateRecipe = async () => {
         if (!urlOrPrompt.trim()) return;
         console.log(urlOrPrompt)
-        recipeRequest("/api/recipe/generate")
+        recipeRequest("/api/recipe/add_auto")
     }
 
     function isValidUrl(str: string): boolean {

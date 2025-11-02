@@ -44,80 +44,15 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/api/recipe/extract", response_model=IdResponse)
-async def extract_recipe_from_url(data: RecipeRequest) -> IdResponse:
-    url: str = data.request
-    parsed: ParseResult = urlparse(url)
-    base_url: str = f"{parsed.scheme}://{parsed.netloc}"
-
-    ai_supplement = False
-
-    if base_url in custom_scraper_base_urls():
-        try:
-            custom_scraper: CustomScraper = get_scrapper(base_url)()
-            recipe = custom_scraper.scrape(url)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to scrape {url}: {e}")
-    else:
-        try:
-            scraper = scrape_me(url)
-            measured_ingredients: List[str] = scraper.ingredients()
-            instructions: str = scraper.instructions()
-            title: str = scraper.title()
-            img_url: str = scraper.image()
-
-            recipe = Recipe(
-                title=title,
-                url=url,
-                img_url=img_url,
-                measured_ingredients=measured_ingredients,  # type: ignore
-                instructions=instructions,
-            )  # type: ignore
-
-            ai_supplement = True
-
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to scrape {url}: {e}")
-
-    if not recipe:
-        raise HTTPException(
-            status_code=400, detail=f"Failed to scrape {url}, no recipe found."
-        )
-
-    logging.info(f"extracted recipe: {recipe.title}")
-
-    recipe_id: ObjectId = mongo.add_recipe(recipe)
-
-    if ai_supplement:
-        asyncio.create_task(
-            asyncio.to_thread(
-                update_ingredients_in_recipe, recipe_id, title, measured_ingredients
-            )
-        )
-
-    return IdResponse(id=str(recipe_id))  # type: ignore
-
-
-@app.post("/api/recipe/generate", response_model=IdResponse)
-async def generate_recipe(data: RecipeRequest) -> IdResponse:
-    generate_recipe_task = GenerateRecipeTask(GEMINI_KEY, GEMINI_MODEL)
+@app.post("/api/recipe/add_auto", response_model=IdResponse)
+def extract_or_generate_recipe(data: RecipeRequest) -> IdResponse:
     try:
-        generated_recipe: Optional[Recipe] = generate_recipe_task.ai_request(
-            data.request
-        )
-        if not generated_recipe:
-            logging.error("No recipe generated")
-            raise HTTPException(status_code=400, detail=f"Failed to generate recipe")
+        if is_url(data.request):
+            return extract_recipe(data.request)
 
-        logging.info(f"extracted recipe: {generated_recipe.title}")
-
-        recipe_id: ObjectId = mongo.add_recipe(generated_recipe)
-
-        return IdResponse(id=str(recipe_id))
-
-    except RuntimeError as e:
-        logging.error(e)
-        raise HTTPException(status_code=400, detail=f"{e}")
+        return generate_recipe(data.request)
+    except Exception as e:
+        raise ValueError(e)
 
 
 @app.get("/api/recipe/{recipe_id}", response_model=RecipeResponse)
@@ -139,7 +74,7 @@ def delete_recipe(recipe_id: str) -> OkResponse:
     return OkResponse()
 
 
-@app.post("/api/recipe/add", response_model=IdResponse)
+@app.post("/api/recipe/add_manual", response_model=IdResponse)
 async def add_recipe(data: AddRecipeRequest) -> IdResponse:
 
     recipe = Recipe(
@@ -249,3 +184,78 @@ def get_unique_ingredients(recipes: List[Recipe]) -> List[str]:
         unique_ingredients.update(r.ingredients)
 
     return list(unique_ingredients)
+
+
+def extract_recipe(url):
+    parsed: ParseResult = urlparse(url)
+    base_url: str = f"{parsed.scheme}://{parsed.netloc}"
+
+    ai_supplement = False
+
+    if base_url in custom_scraper_base_urls():
+        try:
+            custom_scraper: CustomScraper = get_scrapper(base_url)()
+            recipe = custom_scraper.scrape(url)
+        except Exception as e:
+            raise ValueError(f"Failed to scrape {url}: {e}")
+    else:
+        try:
+            scraper = scrape_me(url)
+            measured_ingredients: List[str] = scraper.ingredients()
+            instructions: str = scraper.instructions()
+            title: str = scraper.title()
+            img_url: str = scraper.image()
+
+            recipe = Recipe(
+                title=title,
+                url=url,
+                img_url=img_url,
+                measured_ingredients=measured_ingredients,  # type: ignore
+                instructions=instructions,
+            )  # type: ignore
+
+            ai_supplement = True
+
+        except Exception as e:
+            raise ValueError(f"Failed to scrape {url}: {e}")
+
+    if not recipe:
+        raise ValueError(f"Failed to scrape {url}, no recipe found.")
+
+    logging.info(f"extracted recipe: {recipe.title}")
+
+    recipe_id: ObjectId = mongo.add_recipe(recipe)
+
+    if ai_supplement:
+        asyncio.create_task(
+            asyncio.to_thread(
+                update_ingredients_in_recipe, recipe_id, title, measured_ingredients
+            )
+        )
+
+    return IdResponse(id=str(recipe_id))  # type: ignore
+
+
+def generate_recipe(request: str) -> IdResponse:
+    generate_recipe_task = GenerateRecipeTask(GEMINI_KEY, GEMINI_MODEL)
+    try:
+        generated_recipe: Optional[Recipe] = generate_recipe_task.ai_request(request)
+        if not generated_recipe:
+            logging.error("No recipe generated")
+            raise HTTPException(status_code=400, detail=f"Failed to generate recipe")
+
+        logging.info(f"extracted recipe: {generated_recipe.title}")
+
+        recipe_id: ObjectId = mongo.add_recipe(generated_recipe)
+
+        return IdResponse(id=str(recipe_id))
+    except Exception as e:
+        raise ValueError(e)
+
+
+def is_url(text):
+    try:
+        result = urlparse(text)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False

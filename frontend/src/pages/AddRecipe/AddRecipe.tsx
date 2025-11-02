@@ -30,7 +30,7 @@ export default function AddRecipe() {
 
         console.log(newRecipe)
 
-        const res = await fetch("/api/recipe/add", {
+        const res = await fetch("/api/recipe_manual", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newRecipe),
